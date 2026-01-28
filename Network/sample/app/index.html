@@ -1,0 +1,64 @@
+<html>
+<style>
+th {
+width:25%;
+text-align:left;
+border: solid 1px #666666;
+background-color: #EEEEFF;
+}
+td {
+width:35%;
+border: solid 1px #666666;
+background-color: #FFFFFF;
+}
+input[type=TEXT] {
+width:80%;
+}
+input[type=submit] {
+width:45;
+}
+</style>
+
+<center>
+<br><br>
+<hr size=4>
+<font size=6><b>uNet3 Network Sample Applicatoin</b></font>
+<hr size=4>
+<br><br>
+<form method=POST action="sample.cgi">
+<table width=50%>
+<tr>
+<th>LED Blinker Interval</th>
+<td>in 100 msec</td>
+<td><input type=TEXT name=led value=10></td>
+<td><input type=submit name=btn value=LED></td>
+</tr>
+<tr>
+<th>Ping Request</th>
+<td>Remote Address (IPv4)</td>
+<td><input type=TEXT name=remote value=192.168.1.1></td>
+<td><input type=submit name=btn value=PING></td>
+</tr>
+<tr>
+<th>Network Time</th>
+<td>SNTP Server (IPv4)</td>
+<td><input type=TEXT name=sntp value=133.243.238.243></td>
+<td><input type=submit name=btn value=SNTP></td>
+</tr>
+<tr>
+<th rowspan="2">Resolver</th>
+<td>Host Name</td>
+<td><input type=TEXT name=fqdn value=eforce.co.jp></td>
+<td rowspan="2"><input type=submit name=btn value=DNS></td>
+</tr>
+<tr>
+<td>DNS Server (IPv4)</td>
+<td><input type=TEXT name=dns value=192.168.1.1></td>
+</tr>
+</table>
+</form>
+</center>
+<br><br><div align="right">
+<a href="http://www.eforce.co.jp">
+Powered by uC3, eForce Co.,Ltd.</a></div>
+</html>

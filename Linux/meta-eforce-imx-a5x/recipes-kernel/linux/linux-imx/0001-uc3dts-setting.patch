@@ -1,0 +1,138 @@
+diff --git a/arch/arm64/boot/dts/freescale/imx8mp-evk.dts b/arch/arm64/boot/dts/freescale/imx8mp-evk.dts
+index 695d76afdfaf..4900699acda3
+--- a/arch/arm64/boot/dts/freescale/imx8mp-evk.dts
++++ b/arch/arm64/boot/dts/freescale/imx8mp-evk.dts
+@@ -35,6 +35,117 @@ memory@40000000 {
+ 		      <0x1 0x00000000 0 0xc0000000>;
+ 	};
+ 
++	/*
++	 * Start for uC3 + Linux
++	 */
++
++	reserved-memory {
++		#address-cells = <2>;
++		#size-cells = <2>;
++		ranges;
++
++		uc3_memory_region: uc3-memories@95000000 {
++			reg = <0x00 0x95000000 0x00 0x06000000>;
++			alignment = <0x1000>;
++			no-map;
++		};
++	};
++
++	/* For two vrings */
++	vring-ctl0@99000000 {
++		compatible = "vring_uio";
++		reg = <0 0x99000000 0 0x00100000>;
++		ipi = <7>;
++		no-map;
++	};
++
++	vring-ctl1@99100000 {
++		compatible = "vring_uio";
++		reg = <0 0x99100000 0 0x00100000>;
++		ipi = <9>;
++		no-map;
++	};
++
++	vring-ctl2@99200000 {
++		compatible = "vring_uio";
++		reg = <0 0x99200000 0 0x00100000>;
++		ipi = <10>;
++		no-map;
++	};
++
++	vring-shm0@99300000 {
++		compatible = "shm_uio";
++		reg = <0 0x99300000 0 0x00100000>;
++		no-map;
++	};
++
++	vring-shm1@99400000 {
++		compatible = "shm_uio";
++		reg = <0 0x99400000 0 0x00100000>;
++		no-map;
++	};
++
++	vring-shm2@99500000 {
++		compatible = "shm_uio";
++		reg = <0 0x99500000 0 0x00100000>;
++		no-map;
++	};
++
++	/* For two shared memory regions */
++	shmapi-ctl0@9A000000 {
++		compatible = "shm_uio";
++		reg = <0 0x9A000000 0 0x00100000>;
++		cache_attr = <3>;
++		no-map;
++	};
++
++	shmapi-ctl1@9A100000 {
++		compatible = "shm_uio";
++		reg = <0 0x9A100000 0 0x00100000>;
++		cache_attr = <3>;
++		no-map;
++	};
++
++	shmapi-ctl2@9A200000 {
++		compatible = "shm_uio";
++		reg = <0 0x9A200000 0 0x00100000>;
++		cache_attr = <3>;
++		no-map;
++	};
++
++	shmapi-blk0@9A300000 {
++		compatible = "shm_uio";
++		reg = <0 0x9A300000 0 0x00400000>;
++		cache_attr = <3>;
++		no-map;
++	};
++
++	shmapi-blk1@9A700000 {
++		compatible = "shm_uio";
++		reg = <0 0x9A700000 0 0x00400000>;
++		cache_attr = <3>;
++		no-map;
++	};
++
++	shmapi-blk2@9AB00000 {
++		compatible = "shm_uio";
++		reg = <0 0x9AB00000 0 0x00400000>;
++		cache_attr = <3>;
++		no-map;
++	};
++
++	/* resource table */
++	rsctbl@98800000 {
++		compatible = "shm_uio";
++		reg = <0 0x98800000 0 0x00001000>;
++		no-map;
++	};
++
++	/*
++	 * End for uC3 + Linux
++	 */
++
++
+ 	pcie0_refclk: pcie0-refclk {
+ 		compatible = "fixed-clock";
+ 		#clock-cells = <0>;
+@@ -223,6 +334,15 @@ usb3_data_ss: endpoint {
+ 	};
+ };
+ 
++/*
++ * Definition of uC3 interrupt numbers without initialization by Linux
++ */
++&gic {
++	#noinit-spi-interrupt-cells = <1>;
++	noinit-spi-interrupts = <61>;
++};
++
++
+ &flexspi {
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&pinctrl_flexspi0>;
