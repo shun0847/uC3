@@ -1,26 +1,9 @@
 /**
- * @file    DDR_AArch64_GICv3_sub.c
  * @brief   Micro C Cube Standard, DEVICE DRIVER
  *          ARM Generic Interrupt Controller v3
  * @date    2025.03.14
- * @author  Copyright (c) 2022-2025, eForce Co., Ltd. All rights reserved.
  *
- ****************************************************************************
- * @par     History
- *          - rev 1.0 (2021.02.03) Imada
- *            Initial version, supporting only Group 1 interrupts.
- *          - rev 1.1 (2021.08.24)
- *            To add get_current_el
- *          - rev 1.2 (2021.09.28)
- *            CFG_GIC_SPIN_LOCK_ID was added (Compatible with earlier releases)
- *          - rev 1.3 (2022.02.03)
- *            Added for secure mode code.
- *          - rev 1.4 (2024.11.19)
- *            Introduce _ddr_gic_bootctx to support uC3 booting up on Linux.
- *          - rev 2.0 (2025.03.14)
- *            c99 was supported
- *            Function name changed to geticc_ctlr from geticc_ctlr_el1
- ****************************************************************************
+ * @copyright (c) 2022-2025, eForce Co., Ltd. All rights reserved.
  */
 
 #include "uC3sys.h"

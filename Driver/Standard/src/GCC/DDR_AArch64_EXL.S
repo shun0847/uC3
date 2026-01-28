@@ -1,17 +1,9 @@
 /**
- * @file    DDR_AArch64_EXL.S
  * @brief   Micro C Cube Standard, Multi Core Extension
  *          Exclusive Access (AArch64)
  * @date    2018.02.27
- * @author  Copyright (c) 2016-2018, eForce Co., Ltd. All rights reserved.
  *
- ******************************************************************************
- * @par     History
- *          - rev 1.0 (2016.09.27) y-kim
- *            Initial version.
- *          - rev 1.1 (2018.02.27) yokota
- *            improve spinlock and unlock function.
- ******************************************************************************
+ * @copyright (c) 2016-2018, eForce Co., Ltd. All rights reserved.
  */
         .globl  vget_cid
 

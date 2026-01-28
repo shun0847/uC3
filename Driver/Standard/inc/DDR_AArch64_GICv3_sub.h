@@ -1,21 +1,9 @@
 /**
- * @file    DDR_AArch64_GICv3_sub.h
  * @brief   Micro C Cube Standard, DEVICE DRIVER
  *          ARM Generic Interrupt Controller v3
  * @date    2025.03.14
- * @author  Copyright (c) 2021-2025, eForce Co., Ltd. All rights reserved.
  *
- ****************************************************************************
- * @par     History
- *          - rev 1.0 (2021.02.02) Imada
- *            Initial version.
- *          - rev 1.1 (2021.08.24)
- *            To add get_current_el
- *          - rev 1.2 (2022.02.03)
- *            remove macro CFG_GIC_INT_GRP
- *          - rev 2.0 (2025.03.14)
- *            Add argument el for geticc_ctlr
- ****************************************************************************
+ * @copyright (c) 2021-2025, eForce Co., Ltd. All rights reserved.
  */
 #ifndef DDR_AARCH64V3_SUB_GIC_H_
 #define DDR_AARCH64V3_SUB_GIC_H_

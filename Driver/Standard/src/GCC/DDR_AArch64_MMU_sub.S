@@ -1,17 +1,8 @@
 /**
- * @file    DDR_AArch64_MMU_sub.S
  * @brief   Micro C Cube Standard, MMU and Cache management (AArch64)
  * @date    2020.01.07
- * @author  Copyright (c) 2016-2020, eForce Co., Ltd. All rights reserved.
  *
- ******************************************************************************
- * @par     History
- *          - rev 1.0 (2016.09.27) y-kim
- *            Initial version.
- *          - rev 1.1 (2020.01.07) yokota
- *            Fix invalid_dcache_all, .
- *            Fix hungup tlbi_alle1is call from el0/el1.
- ******************************************************************************
+ * @copyright (c) 2016-2020, eForce Co., Ltd. All rights reserved.
  */
 
 /*

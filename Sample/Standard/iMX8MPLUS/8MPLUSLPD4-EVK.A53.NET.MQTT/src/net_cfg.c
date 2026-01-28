@@ -64,11 +64,26 @@ PMTU_CACHE gPMTU_CACHE[CFG_PMTU_CACHE];         /* Path MTU Cache */
 /*******************************
     Define Local IP Address
 ********************************/
-
+#if 0
 T_NET_ADR gNET_ADR[] = {
-    {0x0, 0x0, 0x0, 0x0, 0x0},
+    {
+        0x0, 
+        0x0,
+        0xAC110032, /* 172.17.0.50 */
+        0xAC110001, /* 172.17.0.1 */
+        0xFFFFF000 /* 255.255.240.0 */
+    },
 };
-
+#endif
+T_NET_ADR gNET_ADR[] = {
+    {
+        0x0, 
+        0x0,
+        0xC0A82B32, /* 192.168.43.50 */
+        0x0,
+        0xFFFFFF00 /* 255.255.255.0 */
+    },
+};
 #ifdef IPV6_SUP
 T_NET6_ADR gNET6_ADR[1];
 UB         ip6_manual        = FALSE;

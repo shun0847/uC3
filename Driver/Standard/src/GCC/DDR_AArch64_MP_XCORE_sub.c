@@ -1,15 +1,9 @@
 /**
- * @file    DDR_AArch64_MP_XCORE_sub.c
  * @brief   Micro C Cube Standard, XCore extension compiler specifc
  *          Synchronization and Asynchronization System Call
  * @date    2023.09.11
- * @author  Copyright (c) 2023, eForce Co., Ltd.
  *
- ******************************************************************************
- * @par     History
- *          - rev 1.0 (2023.09.11)
- *            Created based on DDR_CortexAMP_XCORE_sub.c
- ******************************************************************************
+ * @copyright (c) 2023, eForce Co., Ltd.
  */
 #include "uC3sys.h"
 #include "uC3xcext.h"

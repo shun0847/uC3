@@ -1,22 +1,9 @@
 /**
- * @file    DDR_AArch64_MP_XCORE.c
  * @brief   Micro C Cube Standard, XCore extension
  *          Driver for Synchronization and Asynchronization System Call
  * @date    2025.06.11
- * @author  Copyright (c) 2023-2025, eForce Co., Ltd.
  *
- ******************************************************************************
- * @par     History
- *          - rev 1.0 (2023.09.11)
- *            Created
- *          - rev 1.1 (2025.05.20)
- *            Add bss-initialization function.
- *            While waiting for the startup of other cores, interrupts are disabled.
- *            Add support for configuring the master core.
- *          - rev 1.2 (2025.06.11)
- *            Remove call to init_sync().
- *            Changed to use ddr_aarch64_gicv3_send_sgi_raw for Generates SGIs.
- ******************************************************************************
+ * @copyright (c) 2023-2025, eForce Co., Ltd.
  */
 #include <string.h>
 #include "uC3sys.h"

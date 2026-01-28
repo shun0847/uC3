@@ -2,8 +2,8 @@
  * @file    uC3chgims.c
  * @brief   Micro C Cube Standard, KERNEL
  *          AArch64 dependent function
- * @date    2017.04.25
- * @author  Copyright (c) 2016-2017, eForce Co., Ltd. All rights reserved.
+ * @date    2025.12.01
+ * @author  Copyright (c) 2016-2025, eForce Co., Ltd. All rights reserved.
  *
  ******************************************************************************
  * @par     History
@@ -11,6 +11,8 @@
  *            Created based on uC3chgims.c of ARMv7-A.
  *          - rev 1.1 (2017.04.25) yokota
  *            Fixed the IPA warnings.
+ *          - rev 1.2 (2025.12.01)
+ *            Clear the interrupt mask status if iims is equal to 0x0U.
  ******************************************************************************
  */
 #include "uC3sys.h"
@@ -30,6 +32,7 @@ ER chg_ims(IMASK imask)
         if ((iims == 0U) && (imask == 1U)) {
             _kernel_systbl.iims = 0U;
         } else if (iims == 1U) {
+            _kernel_systbl.stat.s.ims = 0;
             _kernel_relrun();
         } else {
             /* Do Nothing */

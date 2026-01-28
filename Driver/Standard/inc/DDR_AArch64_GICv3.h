@@ -1,23 +1,9 @@
 /**
- * @file    DDR_AArch64_GICv3.h
- * @brief   Micro C Cube Standard, DEVICE DRIVER
- *          ARM Generic Interrupt Controller v3
- * @date    2025.06.11
- * @author  Copyright (c) 2021-2025, eForce Co., Ltd. All rights reserved.
+ * @brief Micro C Cube Standard, DEVICE DRIVER
+ *        ARM Generic Interrupt Controller v3
+ * @date  2025.10.24
  *
- ****************************************************************************
- * @par     History
- *          - rev 1.0 (2021.01.07) Imada
- *            Initial version.
- *          - rev 1.1 (2021.08.24)
- *            To add ddr_aarch64_gicv3_cfg
- *          - rev 1.2 (2024.11.19)
- *            To add ddr_aarch64_gic_boot_type_t and
- *            ddr_aarch64_gicv3_set_bootctx
- *          - rev 1.3 (2025.06.11)
- *            To add ddr_aarch64_gic_sgir_t and
- *            ddr_aarch64_gicv3_send_sgi_raw
- ****************************************************************************
+ * @copyright (C) 2021-2025, eForce Co., Ltd.
  */
 #ifndef DDR_AARCH64V3_GIC_H_
 #define DDR_AARCH64V3_GIC_H_

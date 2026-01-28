@@ -1,47 +1,9 @@
 /**
- * @file    DDR_iMX_UART.c
  * @brief   Micro C Cube Standard, DEVICE DRIVER
  *          Serial Interface for Freescale i.MX6, i.MX7 and i.MX8 series
  * @date    2025.05.01
- * @author  Copyright (c) 2010-2025, eForce Co., Ltd. All rights reserved.
  *
- ****************************************************************************
- * @par     History
- *          - rev 1.0 (2010.11.04)
- *            Initial version.
- *          - rev 1.1 (2011.02.21)
- *            Modified for RVDS warning.
- *          - rev 1.2 (2013.08.16)
- *            Adopted for i.MX6DL UART
- *          - rev 1.3 (2016.05.13) y-kim
- *            Added UART6-8 for i.MX6UL.
- *            Moved clock initailization to hw_init.c.
- *          - rev 1.4 (2018.07.27) i-cho
- *            Adopted for i.MX7D UART.
- *            Change this file name.
- *            Interrupt number is set by CFG_INT_UARTn macro.
- *          - rev 1.5 (2018.10.04) i-cho
- *            Fix bug, and imporve statics analize.
- *          - rev 1.6 (2019.10.21) nozaki
- *            Fix bugs introduced when optimization is enabled.
- *          - rev 1.7 (2019.11.05) nozaki
- *            Set ONEMS register correctly.
- *          - rev 1.8 (2020.02.07) i-cho
- *            Added Reinitialization featrue.
- *            Fixed bug, TXEMPTY bit judgment in ddr_mx6uart_dis_send.
- *            Fixed bug, RXEMPTY bit judgment in ddr_mx6uart_dis_rcv.
- *          - rev 1.9 (2020.11.02) Imada
- *            Fixed C++test warnings
- *          - rev 2.0 (2020.11.19) Imada
- *            Added a busy loop to wait until the software reset status
- *            becomes inactive
- *            Added dly_tsk(0U) in _ddr_imx_uart_ini() as a workaround on 
- *            i.MX8M Plus
- *          - rev 2.1 (2021.04.09)
- *            Fixed bug, acre_isr judgment in _ddr_imx_uart_init.
- *          - rev 2.2 (2025.05.01)
- *            Fix C++Test warnings.
- ****************************************************************************
+ * @copyright (c) 2010-2025, eForce Co., Ltd. All rights reserved.
  */
 #include <string.h>
 #include "kernel.h"

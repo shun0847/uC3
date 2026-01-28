@@ -2,7 +2,7 @@
  * @file    itron.h
  * @brief   Micro C Cube Standard, KERNEL
  *          AArch64 dependent ITRON macro definitions
- * @date    2025.04.18
+ * @date    2025.12.01
  * @author  Copyright (c) 2016-2025, eForce Co., Ltd. All rights reserved.
  *
  ****************************************************************************
@@ -45,6 +45,8 @@
  *            Changed TKERNEL_PRVER to v1.45.2
  *          - rev 2.8 (2025.04.18)
  *            Changed TKERNEL_PRVER to v1.45.4
+ *          - rev 2.9 (2025.12.01)
+ *            Changed TKERNEL_PRVER to v1.45.6
  ****************************************************************************
  */
 #ifndef _ITRON_H_
@@ -79,7 +81,7 @@ extern "C" {
 #define _kernel_INT_BIT     (_kernel_INT_SIZE*8U)
 
 #define TKERNEL_PRID    0x024C
-#define TKERNEL_PRVER   0x1454
+#define TKERNEL_PRVER   0x1456
 
 #define EXC_SYN     1U
 #define EXC_SER     2U

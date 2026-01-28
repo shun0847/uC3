@@ -1,23 +1,9 @@
 /**
- * @file    DDR_COM.h
- * @brief   Micro C Cube Standard, DEVICE DRIVER
- *          Standard Communication Interface
- * @date    2025.05.29
- * @author  Copyright (c) 2008-2025, eForce Co., Ltd. All rights reserved.
+ * @brief Micro C Cube Standard, DEVICE DRIVER
+ *        Standard Communication Interface
+ * @date  2025.10.24
  *
- ****************************************************************************
- * @par     History
- *          - rev 1.0 (2008.05.22)
- *            Initial version.
- *          - rev 1.1 (2016.04.27) y-kim
- *            Added "U" suffix.
- *          - rev 1.2 (2017.08.28) yokota
- *            Added "C" linkage macro.
- *          - rev 1.6 (2025.05.29)
- *            Synchronize the C source with the revision.
- *            Fixed the tbuf type.
- *            Fixed arguments of puts_com.
- ****************************************************************************
+ * @copyright (C) 2008-2025, eForce Co., Ltd.
  */
 #ifndef DDR_COM_H
 #define DDR_COM_H

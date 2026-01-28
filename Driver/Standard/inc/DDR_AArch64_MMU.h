@@ -1,20 +1,8 @@
 /**
- * @file    DDR_AArch64_MMU.h
- * @brief   Micro C Cube Standard, MMU and Cache management (AArch64)
- * @date    2024.03.08
- * @author  Copyright (c) 2016-2024, eForce Co., Ltd. All rights reserved.
+ * @brief Micro C Cube Standard, MMU and Cache management (AArch64)
+ * @date  2025.10.24
  *
- ******************************************************************************
- * @par     History
- *          - rev 1.0 (2016.09.27) y-kim
- *            Initial version.
- *          - rev 1.1 (2018.03.05) yokota
- *            change struture name from mem_cfg_t to T_MEM_CFG.
- *          - rev 1.2 (2020.01.07) yokota
- *            add macro SCTLR_SA0/SCTLR_SA.
- *          - rev 1.3 (2024.03.08)
- *            Remove warnings: left shift count is greater width of type
-  ******************************************************************************
+ * @copyright (C) 2021-2025, eForce Co., Ltd.
  */
 #ifndef DDR_AARCH64_MMU_H_
 #define DDR_AARCH64_MMU_H_

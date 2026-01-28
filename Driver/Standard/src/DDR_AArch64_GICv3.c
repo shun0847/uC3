@@ -1,52 +1,9 @@
 /**
- * @file    DDR_AArch64_GICv3.c
- * @brief   Micro C Cube Standard, DEVICE DRIVER
- *          ARM Generic Interrupt Controller v3
- * @date    2025.06.11
- * @author  Copyright (c) 2021-2025, eForce Co., Ltd. All rights reserved.
+ * @brief Micro C Cube Standard, DEVICE DRIVER
+ *        ARM Generic Interrupt Controller v3
+ * @date  2025.10.24
  *
- ****************************************************************************
- * @par     History
- *          - rev 1.0 (2021.02.02) Imada
- *            Created based on DDR_AArch64_GIC.c
- *            Without support of secure accesses, extended SPI range,
- *            virtual CPU interface, LPI and ITS
- *          - rev 1.1 (2021.04.28) Imada
- *            Fixed GICD IROUTER configuration
- *            Changed a GICD base address macro in init_gicr()
- *          - rev 1.2 (2021.08.24)
- *            To add ddr_aarch64_gicv3_cfg
- *          - rev 1.3 (2021.09.08)
- *            ddr_aarch64_gicv3_cfg was modified
- *          - rev 1.4 (2021.09.28)
- *            CFG_GIC_SPIN_LOCK_ID was added (Compatible with earlier releases)
- *          - rev 1.5 (2022.02.03)
- *            Added G1S, G1NS, G0 mode code.
- *            Fix GICR waker enable.
- *          - rev 1.6 (2022.06.23)
- *            Fix GICR sgi grouping.
- *            Added intinfo check in ena_int.
- *          - rev 1.7 (2024.11.19)
- *            Introduce UC3BOOT_SECONDARY and related functions for uC3+Linux
- *            with an ARMv8-A core running uC3.
- *          - rev 1.8 (2025.03.03)
- *            Fix a compilation error on (USE_SYSTEM != SYSTEM_SINGLE_CORE)
- *          - rev 2.0 (2025.03.14)
- *            GIC-600 was supported
- *            Bug fix: Not successfully enable PPI interrupts
- *          - rev 2.1 (2025.04.28)
- *            Add active interrupt clearing in ddr_aarch64_gicv3_cfg.
- *          - rev 2.2 (2025.05.21)
- *            Cortex-A76 was supported.
- *            Add support for configuring the master core.
- *            Change and introduce some internal macro names.
- *            Fix GICD_CTLR configuration.
- *            Fix condition check in wait_gicr_rwp.
- *          - rev 2.3 (2025.06.11)
- *            To add ddr_aarch64_gicv3_send_sgi_raw.
- *            Fix: Set gicr_sgi->ICFGR[0-1] to the reset values
- *                 specified in the Reference Manual.
- ****************************************************************************
+ * @copyright (C) 2021-2025, eForce Co., Ltd.
  */
 #include "uC3sys.h"
 #include "DDR_AArch64_GICv3.h"

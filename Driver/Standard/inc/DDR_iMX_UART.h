@@ -1,26 +1,9 @@
 /**
- * @file    DDR_iMX_UART.h
  * @brief   Micro C Cube Standard, DEVICE DRIVER
  *          Serial Interface for Freescale i.MX6 series, i.MX7 series
  * @date    2019.11.22
- * @author  Copyright (c) 2010-2019, eForce Co., Ltd. All rights reserved.
  *
- ****************************************************************************
- * @par     History
- *          - rev 1.0 (2010.10.21)
- *            Initial version.
- *          - rev 1.1 (2013.08.02)
- *            Adopted for i.MX6DL UART.
- *          - rev 1.2 (2016.05.13) y-kim
- *            Modified for i.MX6UL.
- *          - rev 1.3 (2018.07.19) i-cho
- *            Adopted for i.MX7D UART.
- *            Change this file name.
- *          - rev 1.5 (2018.10.04) i-cho
- *            Fix bug, and imporve statics analize.
- *          - rev 1.6 (2019.11.22)
- *            Fix UTS_RXDBG definition.
- ****************************************************************************
+ * @copyright (c) 2010-2019, eForce Co., Ltd. All rights reserved.
  */
 #ifndef IMX_UART_H_
 #define IMX_UART_H_

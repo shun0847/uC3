@@ -1,33 +1,8 @@
 /**
- * @file    DDR_AArch64_MMU.c
- * @brief   Micro C Cube Standard, MMU and Cache management (AArch64)
- * @date    2025.04.30
- * @author  Copyright (c) 2016-2025, eForce Co., Ltd. All rights reserved.
+ * @brief Micro C Cube Standard, MMU and Cache management (AArch64)
+ * @date  2025.10.24
  *
- ******************************************************************************
- * @par     History
- *          - rev 1.0 (2016.10.07) y-kim
- *            Initial version.
- *          - rev 1.1 (2020.01.07) yokota
- *            Add check stack aligment.
- *          - rev 1.2 (2020.12.29) Imada
- *            Fixed C++ warnings
- *          - rev 1.3 (2021.08.24)
- *            Add Cortex-A72 support.
- *          - rev 1.4 (2022.08.12) Imada
- *            Forcibly configure 40 <= t{0,1}_bitsz <= 48 and register
- *            the start address of a dedicated page table with TTBR_EL1
- *          - rev 1.5 (2022.11.17) yokota
- *            Fixed miss aligned size for _ddr_aarch64_mmu_invalid_inst_cache
- *                _ddr_aarch64_mmu_invalid_data_cache
- *                _ddr_aarch64_mmu_flush_data_cache
- *                _ddr_aarch64_mmu_clean_data_cache
- *          - rev 2.0 (2025.03.14)
- *            Suppress GCC optimization for _ddr_aarch64_mmu_init
- *            Cortex-A55 was supported
- *          - rev 2.1 (2025.04.30)
- *            Cortex-A76 was supported
- ******************************************************************************
+ * @copyright (C) 2021-2025, eForce Co., Ltd.
  */
 #include <cpu_cfg.h>
 #include <DDR_AArch64_MMU.h>

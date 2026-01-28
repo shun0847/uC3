@@ -1,26 +1,9 @@
 /**
- * @file    DDR_AArch64_GTIMER.c
  * @brief   Micro C Cube Standard, DEVICE DRIVER
  *          ARM Generic Timer
  * @date    2025.06.11
- * @author  Copyright (c) 2016-2025, eForce Co., Ltd. All rights reserved.
  *
- ****************************************************************************
- * @par     History
- *          - rev 1.0 (2016.09.27) y-kim
- *            Created based on DDR_CortexA_GTIMER.c
- *          - rev 1.1 (2018.05.29) yokota
- *            implement _kernel_micro_systim
- *          - rev 1.2 (2021.01.19) Imada
- *            Fixed C++ test warningso
- *          - rev 1.3 (2023.07.14)
- *            Fixed overflow on tmr_rate calculation
- *          - rev 1.4 (2025.05.20)
- *            Fixed the issue of timer counter overflow during ICE breaks.
- *            Add support for configuring the master core.
- *          - rev 1.5 (2025.06.11)
- *            Fix timer calculation of _kernel_micro_systim.
- ****************************************************************************
+ * @copyright (c) 2016-2025, eForce Co., Ltd. All rights reserved.
  */
 #include "kernel.h"
 #include "DDR_AArch64_GTIMER.h"

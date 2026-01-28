@@ -1,28 +1,9 @@
 /**
- * @file    DDR_COM.c
- * @brief   Micro C Cube Standard, DEVICE DRIVER
- *          Standard Communication Interface
- * @date    2025.05.29
- * @author  Copyright (c) 2008-2025, eForce Co., Ltd. All rights reserved.
+ * @brief Micro C Cube Standard, DEVICE DRIVER
+ *        Standard Communication Interface
+ * @date  2025.10.24
  *
- ****************************************************************************
- * @par     History
- *          - rev 1.0 (2008.05.22)
- *            Initial version.
- *          - rev 1.1 (2016.04.27) y-kim
- *            Added "U" suffix.
- *          - rev 1.2 (2017.02.03) yokota
- *            Added the error check for parameters.
- *          - rev 1.3 (2017.02.21) yokota
- *            Fix ini_com parameter check.
- *          - rev 1.4 (2021.01.25) Imada
- *            Fixed C++test warnings.
- *          - rev 1.5 (2021.03.19) sugawara
- *            Added the error check for *scnt and *rcnt.
- *          - rev 1.6 (2025.05.29)
- *            Fixed the tbuf type.
- *            Fixed arguments of puts_com.
- ****************************************************************************
+ * @copyright (C) 2008-2025, eForce Co., Ltd.
  */
 #include "kernel.h"
 #include "DDR_COM.h"

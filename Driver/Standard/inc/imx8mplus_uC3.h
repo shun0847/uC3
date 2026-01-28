@@ -1,28 +1,9 @@
 /**
- * @file    imx8mplus_uC3.h
  * @brief   Micro C Cube Standard, DEVICE DRIVER
  *          i.MX8M Plus depedent definitions
  * @date    2021.03.29
- * @author  Copyright (c) 2020-2021, eForce Co., Ltd. All rights reserved.
  *
- ****************************************************************************
- * @par     History
- *          - rev 1.0 (2020.11.17) Imada
- *            Initial version.
- *          - rev 1.1 (2021.02.02) Imada
- *            Added definition for CA53 cores
- *          - rev 1.2 (2021.02.04) s.makino
- *            The following changes have been made:
- *            - Added GPIO definition and structure.
- *            - Added ENET_QOS definition and structure.
- *            - Updated t_ccm_ccgr_index enum.
- *            - Updated t_iomuxc_sw_mux_ctl_pad enum.
- *            - Updated t_iomuxc_sw_pad_ctl_pad enum.
- *            - Updated t_iomuxc_select_input enum.
- *          - rev 1.3 (2021.03.29) Imada
- *            - Replaced #ifdef or #ifndef by #if defined() or !defined()
- *            - Fixed a register name in struct t_iomuxc_gpr
- ****************************************************************************
+ * @copyright (c) 2020-2021, eForce Co., Ltd. All rights reserved.
  */
 #if !defined(IMX8MPLUS_H_)
 #define IMX8MPLUS_H_

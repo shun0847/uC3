@@ -1,17 +1,9 @@
 /**
- * @file    DDR_AArch64_GETIMER_sub.c
  * @brief   Micro C Cube Standard, DEVICE DRIVER
  *          ARM Generic Timer
  * @date    2021.09.27
- * @author  Copyright (c) 2016-2021, eForce Co., Ltd. All rights reserved.
  *
- ****************************************************************************
- * @par     History
- *          - rev 1.0 (2016.09.27) y-kim
- *            Created based on DDR_CortexA_GETIMER_sub.c
- *          - rev 1.1 (2021.09.27) yokota
- *            Add CPU_ACCESS_MODE.
- ****************************************************************************
+ * @copyright (c) 2016-2021, eForce Co., Ltd. All rights reserved.
  */
 #include "kernel.h"
 #include "cpu_cfg.h"

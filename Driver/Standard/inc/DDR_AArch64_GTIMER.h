@@ -1,15 +1,9 @@
 /**
- * @file    DDR_AArch64_GTIMER.h
  * @brief   Micro C Cube Standard, DEVICE DRIVER
  *          ARM Generic Timer
  * @date    2016.09.27
- * @author  Copyright (c) 2016, eForce Co., Ltd. All rights reserved.
  *
- ****************************************************************************
- * @par     History
- *          - rev 1.0 (2016.09.27) y-kim
- *            Created based on DDR_CortexA_GTIMER.h
- ****************************************************************************
+ * @copyright (c) 2016, eForce Co., Ltd. All rights reserved.
  */
 #ifndef _DDR_AARCH64_GTIMER_H_
 #define _DDR_AARCH64_GTIMER_H_
