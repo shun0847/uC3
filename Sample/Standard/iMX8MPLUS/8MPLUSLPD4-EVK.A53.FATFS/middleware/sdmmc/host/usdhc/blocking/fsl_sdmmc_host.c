@@ -233,7 +233,20 @@ static void SDMMCHOST_ErrorRecovery(USDHC_Type *base)
 
 void SDMMCHOST_SetCardPower(sdmmchost_t *host, bool enable)
 {
-    /* host not support */
+    USDHC_Type *base = host->hostController.base;
+
+    if (enable)
+    {
+        /* eMMC reset sequence for EVK: assert then deassert RESET_B */
+        USDHC_AssertHardwareReset(base, false);
+        SDMMC_OSADelay(10U);
+        USDHC_AssertHardwareReset(base, true);
+        SDMMC_OSADelay(1U);
+    }
+    else
+    {
+        USDHC_AssertHardwareReset(base, false);
+    }
 }
 
 void SDMMCHOST_SetCardBusWidth(sdmmchost_t *host, uint32_t dataBusWidth)
@@ -345,6 +358,10 @@ status_t SDMMCHOST_Init(sdmmchost_t *host)
     usdhcHost->config.readWatermarkLevel  = 0x80U;
     usdhcHost->config.writeWatermarkLevel = 0x80U;
     USDHC_Init(usdhcHost->base, &(usdhcHost->config));
+#if !(defined(FSL_FEATURE_USDHC_HAS_NO_VOLTAGE_SELECT) && (FSL_FEATURE_USDHC_HAS_NO_VOLTAGE_SELECT))
+    UART_PRINTF("Enable 1.8V signal voltage\r\n");
+    UDSHC_SelectVoltage(usdhcHost->base, true);
+#endif
 
     return kStatus_Success;
 }
@@ -355,7 +372,7 @@ void SDMMCHOST_Reset(sdmmchost_t *host)
 
 #if SDMMCHOST_SUPPORT_VOLTAGE_CONTROL
     /* voltage switch to normal but not 1.8V */
-    UDSHC_SelectVoltage(base, false);
+    UDSHC_SelectVoltage(base, true);
 #endif
     /* Disable DDR mode */
     USDHC_EnableDDRMode(base, false, 0U);
@@ -498,9 +515,6 @@ static status_t SDMMC_CheckTuningResult(uint32_t *tuningWindow, uint32_t *validW
             {
                 tempValidWindowEnd = i - 1U;
 
-#if defined SDMMC_ENABLE_LOG_PRINT
-                SDMMC_LOG("valid tuning window start: %d, end: %d\r\n", tempValidWindowStart, tempValidWindowEnd);
-#endif
                 if (tempValidWindowLen > validWindowLenMax)
                 {
                     validWindowLenMax   = tempValidWindowLen;
@@ -561,16 +575,10 @@ static status_t SDMMCHOST_ExecuteManualTuning(sdmmchost_t *host,
         {
             USDHC_ClearInterruptStatusFlags(host->hostController.base, kUSDHC_TuningPassFlag);
             tuningWindow[tuningDelayCell / 32U] |= 1UL << (tuningDelayCell % 32U);
-
-#if defined SDMMC_ENABLE_LOG_PRINT
-            SDMMC_LOG("tuning pass point: %d\r\n", tuningDelayCell);
-#endif
         }
         else
         {
-#if defined SDMMC_ENABLE_LOG_PRINT
-            SDMMC_LOG("tuning fail point: %d\r\n", tuningDelayCell);
-#endif
+
         }
 
         if (++tuningDelayCell >= SDMMCHOST_MAX_TUNING_DELAY_CELL)

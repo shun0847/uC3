@@ -1,8 +1,8 @@
 /**
  * @file    prst.S
  * @brief   Reset handler for 8MPLUSLPD4-EVK (i.MX8M Plus, Cortex-A53)
- * @date    2026.01.05
- * @author  Copyright (c) 2021-2026, eForce Co., Ltd. All rights reserved.
+ * @date    2025.10.02
+ * @author  Copyright (c) 2021-2025, eForce Co., Ltd. All rights reserved.
  *
  ******************************************************************************
  * @par     History
@@ -22,8 +22,6 @@
  *            Add _ddr_aarch64_gicv3_cfg invocation.
  *          - rev 1.5 (2025.10.02)
  *            Fixed ddr_aarch64_gicv3_cfg declaration.
- *          - rev 1.6 (2026.01.05)
- *            Remove E2H flag setting.
  ******************************************************************************
  */
 
@@ -141,6 +139,7 @@ rh_boot_secondary:
          * Switch exception level from EL2 to EL1
          */
         mov     x0,  #(0x1 << 31)   // AArch64
+        orr     x0,  x0,  #(0x1 << 34) // E2H
         orr     x0,  x0,  #(0x1 << 1)  // SWIO
         msr     hcr_el2,  x0
         movz    x0,  #0x1c4

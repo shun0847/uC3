@@ -10,7 +10,9 @@
  *            Initial version.
  ****************************************************************************
  */
+#include <stdio.h>
 #include <string.h>
+#include <stdarg.h>
 #include "kernel.h"
 #include "DDR_COM.h"
 #include "sample_uart_cfg.h"
@@ -19,7 +21,6 @@
 
 static void uart_send_task(VP_INT exinf);
 static void uart_recv_task(VP_INT exinf);
-
 /* Private typedef -----------------------------------------------------------*/
 
 /* User input message */
@@ -62,7 +63,8 @@ static void uart_send_task(VP_INT exinf)
 
     (void)ctr_com(ID_UART, SND_BRK, 100);
     txcnt = strlen(banner_str);
-    (void)puts_com(ID_UART, banner_str, &txcnt, TMO_FEVR);
+    UART_PRINTF("%s", banner_str);
+    //(void)puts_com(ID_UART, banner_str, &txcnt, TMO_FEVR);
 
     do {
         ercd = getc_com(ID_UART, &chr, 0, 10);
@@ -129,6 +131,26 @@ void sample_uart_start(void)
         0,
         "Mbx"};
 
+    const T_COM_SMOD  uart_ini = {
+        CFG_BAUDRATE,
+        CFG_BLEN,
+        CFG_PAR,
+        CFG_SBIT,
+        CFG_FLW
+    };
+
+    (void)DDR_UART_INIT_FN(ID_UART, &REG_UART);
+
+    g_mpfID = acre_mpf((T_CMPF *)&cmpf);
+    g_mbxID = acre_mbx((T_CMBX *)&cmbx);
+
+    (void)ini_com(ID_UART, &uart_ini);
+    (void)ctr_com(ID_UART, STA_COM, 0);
+
+    (void)ctr_com(ID_UART, SND_BRK, 100);
+    
+#if 0
+
     const T_CTSK ctsk_snd = {
         TA_HLNG | TA_ACT | TA_FPU,
         (VP_INT)0,
@@ -147,10 +169,51 @@ void sample_uart_start(void)
         0,
         "uart_recv_task"};
 
-    (void)DDR_UART_INIT_FN(ID_UART, &REG_UART);
-
-    g_mpfID = acre_mpf((T_CMPF *)&cmpf);
-    g_mbxID = acre_mbx((T_CMBX *)&cmbx);
     (void)acre_tsk((T_CTSK *)&ctsk_snd);
     (void)acre_tsk((T_CTSK *)&ctsk_rcv);
+#endif
+}
+
+void UART_PRINTF(const char *fmt, ...)
+{
+    static char buf[UART_PRINTF_BUF_SIZE];
+    va_list ap;
+
+    va_start(ap, fmt);
+    int n = vsnprintf(buf, sizeof(buf), fmt, ap);
+    va_end(ap);
+
+    if (n < 0) {
+        return;
+    }
+
+    /* vsnprintf がバッファを超えた場合でも、バッファ内はNUL終端される */
+    buf[sizeof(buf) - 1] = '\0';
+
+    /* ここに“挟みたい処理”を書く（例：ログタグ付与、改行統一、フィルタ等） */
+    // preprocess(buf);
+
+    UINT txcnt;
+
+    if (n >= (int)sizeof(buf)) {
+        txcnt = (UINT)(sizeof(buf) - 1);
+    } else {
+        txcnt = (UINT)n;
+    }
+    txcnt = (UINT)strlen(buf);
+    (void)puts_com(ID_UART, buf, &txcnt, TMO_FEVR);
+
+    return; 
+}
+
+void UART_PUTCHAR(char ch)
+{
+    (void)putc_com(ID_UART, (VB)ch, TMO_FEVR);
+}
+
+char UART_GETCHAR(void)
+{
+    VB ch;
+    getc_com(ID_UART, &ch, 0, 10);
+    return (char)ch;
 }

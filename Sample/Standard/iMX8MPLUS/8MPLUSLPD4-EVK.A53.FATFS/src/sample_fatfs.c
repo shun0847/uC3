@@ -9,21 +9,22 @@
 #include <stdio.h>
 #include <string.h>
 #include "fsl_mmc.h"
-#include "fsl_gpio.h"
-#include "fsl_debug_console.h"
 #include "ff.h"
 #include "diskio.h"
-#include "app.h"
 #include "sdmmc_config.h"
+#include "sample_fatfs_cfg.h"
+//#include "kernel.h"
+
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
 /* buffer size (in byte) for read/write operations */
-#define BUFFER_SIZE (513U)
+#define BUFFER_SIZE (512U)
 /*******************************************************************************
  * Prototypes
  ******************************************************************************/
-
+static int fatfs_task(VP_INT exinf);
+extern void usdhc3_dump_iomux(void);
 /*******************************************************************************
  * Variables
  ******************************************************************************/
@@ -46,7 +47,8 @@ SDK_ALIGN(uint8_t g_bufferRead[BUFFER_SIZE], BOARD_SDMMC_DATA_BUFFER_ALIGN_SIZE)
 /*******************************************************************************
  * Code
  ******************************************************************************/
-int main(void)
+#if defined(MMC_ENABLED)
+int fatfs_task(VP_INT exinf)
 {
     FRESULT error;
     DIR directory; /* Directory object */
@@ -59,20 +61,44 @@ int main(void)
     BYTE work[FF_MAX_SS];
     FRESULT result;
 
-    BOARD_InitHardware();
+    usdhc3_dump_iomux();
+
+    //BOARD_InitHardware();
     BOARD_MMC_Config(&g_mmc, BOARD_SDMMC_MMC_HOST_IRQ_PRIORITY);
 
     PRINTF("\r\nFATFS example to demonstrate how to use FATFS with MMC card.\r\n");
 
     /* Mount volume work area based on card. */
-    if (f_mount(&g_fileSystem, driverNumberBuffer, 0U))
+    result = f_mount(&g_fileSystem, driverNumberBuffer, 1U);
+    PRINTF("\r\nf_mount() Return Value: %d\r\n", result);
+    return -1;
+#if FF_USE_MKFS
+    if (result == FR_NO_FILESYSTEM)
     {
-        PRINTF("Mount volume failed.\r\n");
+        PRINTF("\r\nMake file system......The time may be long if the card capacity is big.\r\n");
+        result = f_mkfs(driverNumberBuffer, 0, work, sizeof work);
+        PRINTF("f_mkfs() Return Value: %d\r\n", result);
+        if (result)
+        {
+            PRINTF("Make file system failed.\r\n");
+            return -1;
+        }
+    }
+#endif /* FF_USE_MKFS */
+
+    if (result != FR_OK)
+    {
+        PRINTF("Mount volume failed. result=%d\r\n", result);
         return -1;
     }
-
+    else
+    {
+        PRINTF("Mount volume success.\r\n");
+    } 
+    
 #if (FF_FS_RPATH >= 2)
     error = f_chdrive((char const *)&driverNumberBuffer[0]);
+    PRINTF("\r\nf_chdrive() Return Value: %d\r\n", error);
     if (error)
     {
         PRINTF("Change drive failed.\r\n");
@@ -80,18 +106,9 @@ int main(void)
     }
 #endif
 
-#if FF_USE_MKFS
-    PRINTF("\r\nMake file system......The time may be long if the card capacity is big.\r\n");
-    result = f_mkfs(driverNumberBuffer, 0, work, sizeof work);
-    if (result)
-    {
-        PRINTF("Make file system failed.\r\n");
-        return -1;
-    }
-#endif /* FF_USE_MKFS */
-
     PRINTF("\r\nCreate directory......\r\n");
     error = f_mkdir(_T("/dir_1"));
+    PRINTF("f_mkdir() Return Value: %d\r\n", error);
     if (error)
     {
         if (error == FR_EXIST)
@@ -107,6 +124,7 @@ int main(void)
 
     PRINTF("\r\nCreate a file in that directory......\r\n");
     error = f_open(&g_fileObject, _T("/dir_1/f_1.dat"), (FA_WRITE | FA_READ | FA_CREATE_ALWAYS));
+    PRINTF("f_open() Return Value: %d\r\n", error);
     if (error)
     {
         if (error == FR_EXIST)
@@ -121,7 +139,9 @@ int main(void)
     }
 
     PRINTF("\r\nList the file in that directory......\r\n");
-    if (f_opendir(&directory, "/dir_1"))
+    error = f_opendir(&directory, "/dir_1");
+    PRINTF("f_opendir() Return Value: %d\r\n", error);
+    if (error)
     {
         PRINTF("Open directory failed.\r\n");
         return -1;
@@ -130,6 +150,7 @@ int main(void)
     for (;;)
     {
         error = f_readdir(&directory, &fileInformation);
+        PRINTF("f_readdir() Return Value: %d\r\n", error);
 
         /* To the end. */
         if ((error != FR_OK) || (fileInformation.fname[0U] == 0U))
@@ -161,6 +182,7 @@ int main(void)
 
         PRINTF("\r\nWrite to above created file.\r\n");
         error = f_write(&g_fileObject, g_bufferWrite, sizeof(g_bufferWrite), &bytesWritten);
+        PRINTF("f_write() Return Value: %d\r\n", error);
         if ((error) || (bytesWritten != sizeof(g_bufferWrite)))
         {
             PRINTF("Write file failed. \r\n");
@@ -210,4 +232,19 @@ int main(void)
     while (true)
     {
     }
+}
+#endif /* MMC_ENABLED */
+
+void sample_fatfs_start(void)
+{
+    const T_CTSK ctsk_fatfs = {
+        TA_HLNG | TA_ACT | TA_FPU,
+        (VP_INT)0,
+        (FP)fatfs_task,
+        6,
+        0x2000,
+        0,
+        "fatfs_task"};
+
+    (void)acre_tsk((T_CTSK *)&ctsk_fatfs);
 }

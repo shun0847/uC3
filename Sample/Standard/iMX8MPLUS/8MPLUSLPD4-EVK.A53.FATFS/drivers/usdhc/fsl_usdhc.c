@@ -13,6 +13,9 @@
 #if defined(FSL_FEATURE_MEMORY_HAS_ADDRESS_OFFSET) && FSL_FEATURE_MEMORY_HAS_ADDRESS_OFFSET
 #include "fsl_memory.h"
 #endif
+
+extern void UART_PRINTF(const char *fmt, ...);
+static bool s_cmd1ErrorLogged;
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
@@ -738,6 +741,29 @@ static status_t USDHC_WaitCommandDone(USDHC_Type *base, usdhc_command_t *command
         if (error == kStatus_Success)
         {
             error = USDHC_ReceiveCommandResponse(base, command);
+            if ((command->index == 1U) && (command->responseType == kCARD_ResponseTypeR3))
+            {
+                s_cmd1ErrorLogged = false;
+            }
+        }
+        else
+        {
+            if ((command->index == 1U) && (command->responseType == kCARD_ResponseTypeR3))
+            {
+                if (!s_cmd1ErrorLogged)
+                {
+                    UART_PRINTF(
+                        "USDHC CMD error: INT_STATUS=0x%08x PRES=0x%08x CMD_ARG=0x%08x CMD_XFR=0x%08x SYS_CTRL=0x%08x\r\n",
+                        interruptStatus, base->PRES_STATE, base->CMD_ARG, base->CMD_XFR_TYP, base->SYS_CTRL);
+                    s_cmd1ErrorLogged = true;
+                }
+            }
+            else
+            {
+                UART_PRINTF(
+                    "USDHC CMD error: INT_STATUS=0x%08x PRES=0x%08x CMD_ARG=0x%08x CMD_XFR=0x%08x SYS_CTRL=0x%08x\r\n",
+                    interruptStatus, base->PRES_STATE, base->CMD_ARG, base->CMD_XFR_TYP, base->SYS_CTRL);
+            }
         }
 
         USDHC_ClearInterruptStatusFlags(base, kUSDHC_CommandFlag);

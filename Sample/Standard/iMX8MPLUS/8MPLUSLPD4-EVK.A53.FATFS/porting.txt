@@ -1,0 +1,81 @@
+参照元：https://github.com/nxp-mcuxpresso
+ファイル構成(8MPLUSLPD4-EVK.A53.UARTベース)
+|  
+|__src
+| 	|__ffconf.h					https://github.com/nxp-mcuxpresso/mcuxsdk-middleware-sdmmc/blob/mcux_main/example/mmccard_fatfs/ffconf.h
+| 	|__sdmmc_config.h			https://github.com/nxp-mcuxpresso/mcuxsdk-middleware-sdmmc/tree/mcux_main/template/usdhc
+| 	|__sdmmc_config.c			同上
+|	|__sample_fatfs.c			https://github.com/nxp-mcuxpresso/mcuxsdk-middleware-sdmmc/blob/mcux_main/example/mmccard_fatfs/mmccard_fatfs.c  (タスク実行に修正)
+|  	|__sample_fatfs_cfg.h		新規作成
+|  
+|__componets
+|  	|__lists					https://github.com/nxp-mcuxpresso/mcux-component/tree/main/lists
+|  	|__osa						https://github.com/nxp-mcuxpresso/mcux-component/tree/main/osa (bm) 
+|  
+|__middleware
+| 	|__ fatfs/source  			https://github.com/nxp-mcuxpresso/fatfs
+|   |__ sdmmc		 		
+|  	     |__common				https://github.com/nxp-mcuxpresso/mcuxsdk-middleware-sdmmc/tree/mcux_main/common
+|  	     |__host				https://github.com/nxp-mcuxpresso/mcuxsdk-middleware-sdmmc/tree/mcux_main/host/usdhc
+|  	     |__mmc					https://github.com/nxp-mcuxpresso/mcuxsdk-middleware-sdmmc/tree/mcux_main/mmc
+|  	     |__osa					https://github.com/nxp-mcuxpresso/mcuxsdk-middleware-sdmmc/tree/mcux_main/osa
+|  
+|__drivers
+|   |__common					https://github.com/nxp-mcuxpresso/mcuxsdk-core/tree/main/drivers/common	
+|   |__device					https://github.com/nxp-zephyr/hal_nxp/tree/master/mcux/mcux-sdk/devices/MIMX8ML8 (必要ファイルは選択) 
+|   |__usdhc   					https://github.com/nxp-mcuxpresso/mcuxsdk-core/tree/main/drivers/usdhc
+|
+|__CMSIS
+    |__Core_AArch64 			https://github.com/nxp-zephyr/hal_nxp/tree/master/mcux/mcux-sdk/CMSIS/Core_AArch64
+
+
+ブートをeMMCからに修正
+bootcmd=run sr_ir_v2_cmd; bootflow scan -lb; run uC3_bootcmd;
+↓
+bootcmd=run uC3_bootcmd
+uC3_bootcmd=echo Boot uC3...; mmc dev ${sd_dev}; if load mmc ${sd_dev}:1 0x40800000 uC3_image_signed.bin; then if hab_auth_img 0x40800000 ${filesize} 0xE00000; then go 0x40800000; else echo HAB AUTH FAIL; fi; else echo LOAD FAIL; fi
+↓
+uC3_bootcmd=echo 
+
+変更点
+fsl_mmc.c：SDMMC_LOG()を削除
+config.mk: 追加したフォルダパスを追加、MMC_ENABLED・CPU_MIMX8ML8DVNLZ_ca53を定義
+hw_init.c: uSDHC3の初期化追加
+sdmmc_config: 必要初期化及び変更
+- 
+ffconf.h:
+- FF_FS_REENTRANT 1 (mutex不要)
+- FF_USE_MKFS 0	(f_mkfs())
+lscript.ld: NonCacheableセクションを配置 
+
+課題
+usdhcのMMC操作についてblockingかnon_blockingか？
+ベアメタル実装で問題ないか？
+Cache、DMA、排他(Aコア依存部) も考慮するべきか？
+- 依存要素：時間・タイマ、割込み制御、タスク・スケジューリング、同期プリミティブ(sem, mutex, event, msgQ)、割込みハンドラ登録
+
+LinuxBSPの対応層をそのまま移植？
+・同期/タスク/イベントは カーネルAPI（mutex, waitqueue, completion など)
+・SD/MMCはカーネルのMMCサブシステムに統合されたドライバ
+→アーキ+OSA依存を再実装する必要あり
+
+
+ボード依存ファイル参考
+https://github.com/nxp-mcuxpresso/mcuxsdk-examples/tree/main/_boards/evkmimx8mp
+
+eMMCのパーティション作成
+BSP コマンドにて
+fdisk /dev/mmcblk2
+
+パーティション一覧確認
+Command (m for help): p
+
+新規パーティション作成
+ログ確認
+
+Fat32に変更
+Command (m for help): t
+Partition number (1-3): 3
+Hex code (type L to list codes): c
+
+

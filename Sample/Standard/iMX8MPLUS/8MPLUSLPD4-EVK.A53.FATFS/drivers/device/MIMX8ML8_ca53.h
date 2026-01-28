@@ -46,6 +46,10 @@
  *
  * CMSIS Peripheral Access Layer for MIMX8ML8_ca53
  */
+/* ▽▽▽ SNY 定義の重複解消 add ▽▽▽ */
+#include "kernel.h"
+#include "imx8mplus_uC3.h"
+/* △△△ SNY 定義の重複解消 add △△△ */
 
 #ifndef _MIMX8ML8_CA53_H_
 #define _MIMX8ML8_CA53_H_                        /**< Symbol preventing repeated inclusion */
@@ -290,6 +294,7 @@ typedef enum IRQn {
 #define __CACHE_PRESENT                1         /**< CACHE present or not */
 
 #include "core_ca53.h"                 /* Core Peripheral Access Layer */
+#include "MIMX8ML8_ca53_features.h"    /* 2025.09.08 kawashima */
 #include "system_MIMX8ML8_ca53.h"      /* Device specific configuration file */
 
 /*!
@@ -10378,9 +10383,11 @@ typedef struct {
  */ /* end of group CCM_Register_Masks */
 
 
-/* CCM - Peripheral instance base addresses */
+ /* CCM - Peripheral instance base addresses */
 /** Peripheral CCM base address */
-#define CCM_BASE                                 (0x30380000u)
+/* ▽▽▽ SNY 定義の重複解消 del ▽▽▽ */
+/* #define CCM_BASE                                 (0x30380000u) */
+/* △△△ SNY 定義の重複解消 del △△△ */
 /** Peripheral CCM base pointer */
 #define CCM                                      ((CCM_Type *)CCM_BASE)
 /** Array initializer of CCM peripheral base addresses */
@@ -33700,31 +33707,31 @@ typedef struct {
  * @}
  */ /* end of group ENET_Register_Masks */
 
-
+/* ▽▽▽ SNY 定義の重複解消 del ▽▽▽ */
 /* ENET - Peripheral instance base addresses */
 /** Peripheral ENET1 base address */
-#define ENET1_BASE                               (0x30BE0000u)
+/* #define ENET1_BASE                               (0x30BE0000u) */
 /** Peripheral ENET1 base pointer */
-#define ENET1                                    ((ENET_Type *)ENET1_BASE)
+/* #define ENET1                                    ((ENET_Type *)ENET1_BASE) */
 /** Array initializer of ENET peripheral base addresses */
-#define ENET_BASE_ADDRS                          { ENET1_BASE }
+/* #define ENET_BASE_ADDRS                          { ENET1_BASE } */
 /** Array initializer of ENET peripheral base pointers */
-#define ENET_BASE_PTRS                           { ENET1 }
+/* #define ENET_BASE_PTRS                           { ENET1 } */
 /** Interrupt vectors for the ENET peripheral type */
-#define ENET_Transmit_IRQS                       { ENET1_IRQn }
-#define ENET_Receive_IRQS                        { ENET1_IRQn }
-#define ENET_Error_IRQS                          { ENET1_IRQn }
-#define ENET_1588_Timer_IRQS                     { ENET1_1588_IRQn }
-#define ENET_Ts_IRQS                             { ENET1_IRQn }
+/* #define ENET_Transmit_IRQS                       { ENET1_IRQn } */
+/* #define ENET_Receive_IRQS                        { ENET1_IRQn } */
+/* #define ENET_Error_IRQS                          { ENET1_IRQn } */
+/* #define ENET_1588_Timer_IRQS                     { ENET1_1588_IRQn } */
+/* #define ENET_Ts_IRQS                             { ENET1_IRQn } */
 /* ENET Buffer Descriptor and Buffer Address Alignment. */
-#define ENET_BUFF_ALIGNMENT                      (64U)
+/* #define ENET_BUFF_ALIGNMENT                      (64U) */
 
 
 /*!
  * @}
  */ /* end of group ENET_Peripheral_Access_Layer */
 
-
+/* △△△ SNY 定義の重複解消 del △△△ */
 /* ----------------------------------------------------------------------------
    -- ENET_QOS Peripheral Access Layer
    ---------------------------------------------------------------------------- */
@@ -51550,22 +51557,22 @@ typedef struct {
  * @}
  */ /* end of group GPC_Register_Masks */
 
-
+/* ▽▽▽ SNY 定義の重複解消 del ▽▽▽ */
 /* GPC - Peripheral instance base addresses */
 /** Peripheral GPC base address */
-#define GPC_BASE                                 (0x303A0000u)
+/* #define GPC_BASE                                 (0x303A0000u) */
 /** Peripheral GPC base pointer */
-#define GPC                                      ((GPC_Type *)GPC_BASE)
+/* #define GPC                                      ((GPC_Type *)GPC_BASE) */
 /** Array initializer of GPC peripheral base addresses */
-#define GPC_BASE_ADDRS                           { GPC_BASE }
+/* #define GPC_BASE_ADDRS                           { GPC_BASE } */
 /** Array initializer of GPC peripheral base pointers */
-#define GPC_BASE_PTRS                            { GPC }
+/* #define GPC_BASE_PTRS                            { GPC } */
 
 /*!
  * @}
  */ /* end of group GPC_Peripheral_Access_Layer */
-
-
+ 
+/* △△△ SNY 定義の重複解消 del △△△ */
 /* ----------------------------------------------------------------------------
    -- GPC_PGC Peripheral Access Layer
    ---------------------------------------------------------------------------- */
@@ -52501,41 +52508,41 @@ typedef struct {
  * @}
  */ /* end of group GPIO_Register_Masks */
 
-
-/* GPIO - Peripheral instance base addresses */
+/* ▽▽▽ SNY 定義の重複解消 del ▽▽▽ */
+ /* GPIO - Peripheral instance base addresses */
 /** Peripheral GPIO1 base address */
-#define GPIO1_BASE                               (0x30200000u)
+/* #define GPIO1_BASE                               (0x30200000u) */
 /** Peripheral GPIO1 base pointer */
-#define GPIO1                                    ((GPIO_Type *)GPIO1_BASE)
+/* #define GPIO1                                    ((GPIO_Type *)GPIO1_BASE) */
 /** Peripheral GPIO2 base address */
-#define GPIO2_BASE                               (0x30210000u)
+/* #define GPIO2_BASE                               (0x30210000u) */
 /** Peripheral GPIO2 base pointer */
-#define GPIO2                                    ((GPIO_Type *)GPIO2_BASE)
+/* #define GPIO2                                    ((GPIO_Type *)GPIO2_BASE) */
 /** Peripheral GPIO3 base address */
-#define GPIO3_BASE                               (0x30220000u)
+/* #define GPIO3_BASE                               (0x30220000u) */
 /** Peripheral GPIO3 base pointer */
-#define GPIO3                                    ((GPIO_Type *)GPIO3_BASE)
+/* #define GPIO3                                    ((GPIO_Type *)GPIO3_BASE) */
 /** Peripheral GPIO4 base address */
-#define GPIO4_BASE                               (0x30230000u)
+/* #define GPIO4_BASE                               (0x30230000u) */
 /** Peripheral GPIO4 base pointer */
-#define GPIO4                                    ((GPIO_Type *)GPIO4_BASE)
+/* #define GPIO4                                    ((GPIO_Type *)GPIO4_BASE) */
 /** Peripheral GPIO5 base address */
-#define GPIO5_BASE                               (0x30240000u)
+/* #define GPIO5_BASE                               (0x30240000u) */
 /** Peripheral GPIO5 base pointer */
-#define GPIO5                                    ((GPIO_Type *)GPIO5_BASE)
+/* #define GPIO5                                    ((GPIO_Type *)GPIO5_BASE) */
 /** Array initializer of GPIO peripheral base addresses */
-#define GPIO_BASE_ADDRS                          { 0u, GPIO1_BASE, GPIO2_BASE, GPIO3_BASE, GPIO4_BASE, GPIO5_BASE }
+/* #define GPIO_BASE_ADDRS                          { 0u, GPIO1_BASE, GPIO2_BASE, GPIO3_BASE, GPIO4_BASE, GPIO5_BASE } */
 /** Array initializer of GPIO peripheral base pointers */
-#define GPIO_BASE_PTRS                           { (GPIO_Type *)0u, GPIO1, GPIO2, GPIO3, GPIO4, GPIO5 }
+/* #define GPIO_BASE_PTRS                           { (GPIO_Type *)0u, GPIO1, GPIO2, GPIO3, GPIO4, GPIO5 } */
 /** Interrupt vectors for the GPIO peripheral type */
-#define GPIO_IRQS                                { NotAvail_IRQn, GPIO1_INT0_IRQn, GPIO1_INT1_IRQn, GPIO1_INT2_IRQn, GPIO1_INT3_IRQn, GPIO1_INT4_IRQn, GPIO1_INT5_IRQn, GPIO1_INT6_IRQn, GPIO1_INT7_IRQn, NotAvail_IRQn, NotAvail_IRQn, NotAvail_IRQn, NotAvail_IRQn }
-#define GPIO_COMBINED_LOW_IRQS                   { NotAvail_IRQn, GPIO1_Combined_0_15_IRQn, GPIO2_Combined_0_15_IRQn, GPIO3_Combined_0_15_IRQn, GPIO4_Combined_0_15_IRQn, GPIO5_Combined_0_15_IRQn }
-#define GPIO_COMBINED_HIGH_IRQS                  { NotAvail_IRQn, GPIO1_Combined_16_31_IRQn, GPIO2_Combined_16_31_IRQn, GPIO3_Combined_16_31_IRQn, GPIO4_Combined_16_31_IRQn, GPIO5_Combined_16_31_IRQn }
+/* #define GPIO_IRQS                                { NotAvail_IRQn, GPIO1_INT0_IRQn, GPIO1_INT1_IRQn, GPIO1_INT2_IRQn, GPIO1_INT3_IRQn, GPIO1_INT4_IRQn, GPIO1_INT5_IRQn, GPIO1_INT6_IRQn, GPIO1_INT7_IRQn, NotAvail_IRQn, NotAvail_IRQn, NotAvail_IRQn, NotAvail_IRQn } */
+/* #define GPIO_COMBINED_LOW_IRQS                   { NotAvail_IRQn, GPIO1_Combined_0_15_IRQn, GPIO2_Combined_0_15_IRQn, GPIO3_Combined_0_15_IRQn, GPIO4_Combined_0_15_IRQn, GPIO5_Combined_0_15_IRQn } */
+/* #define GPIO_COMBINED_HIGH_IRQS                  { NotAvail_IRQn, GPIO1_Combined_16_31_IRQn, GPIO2_Combined_16_31_IRQn, GPIO3_Combined_16_31_IRQn, GPIO4_Combined_16_31_IRQn, GPIO5_Combined_16_31_IRQn } */
 
 /*!
  * @}
  */ /* end of group GPIO_Peripheral_Access_Layer */
-
+/* △△△ SNY 定義の重複解消 del △△△ */
 
 /* ----------------------------------------------------------------------------
    -- GPMI Peripheral Access Layer
@@ -61043,21 +61050,21 @@ typedef struct {
  * @}
  */ /* end of group IOMUXC_Register_Masks */
 
-
+/* ▽▽▽ SNY 定義の重複解消 del ▽▽▽ */
 /* IOMUXC - Peripheral instance base addresses */
 /** Peripheral IOMUXC base address */
-#define IOMUXC_BASE                              (0x30330000u)
+/* #define IOMUXC_BASE                              (0x30330000u) */
 /** Peripheral IOMUXC base pointer */
-#define IOMUXC                                   ((IOMUXC_Type *)IOMUXC_BASE)
+/* #define IOMUXC                                   ((IOMUXC_Type *)IOMUXC_BASE) */
 /** Array initializer of IOMUXC peripheral base addresses */
-#define IOMUXC_BASE_ADDRS                        { IOMUXC_BASE }
+/* #define IOMUXC_BASE_ADDRS                        { IOMUXC_BASE } */
 /** Array initializer of IOMUXC peripheral base pointers */
-#define IOMUXC_BASE_PTRS                         { IOMUXC }
+/* #define IOMUXC_BASE_PTRS                         { IOMUXC } */
 
 /*!
  * @}
  */ /* end of group IOMUXC_Peripheral_Access_Layer */
-
+/* △△△ SNY 定義の重複解消 del △△△ */
 
 /* ----------------------------------------------------------------------------
    -- IOMUXC_GPR Peripheral Access Layer
@@ -61790,21 +61797,21 @@ typedef struct {
  * @}
  */ /* end of group IOMUXC_GPR_Register_Masks */
 
-
+/* ▽▽▽ SNY 定義の重複解消 del ▽▽▽ */
 /* IOMUXC_GPR - Peripheral instance base addresses */
 /** Peripheral IOMUXC_GPR base address */
-#define IOMUXC_GPR_BASE                          (0x30340000u)
+/* #define IOMUXC_GPR_BASE                          (0x30340000u) */
 /** Peripheral IOMUXC_GPR base pointer */
-#define IOMUXC_GPR                               ((IOMUXC_GPR_Type *)IOMUXC_GPR_BASE)
+/* #define IOMUXC_GPR                               ((IOMUXC_GPR_Type *)IOMUXC_GPR_BASE) */
 /** Array initializer of IOMUXC_GPR peripheral base addresses */
-#define IOMUXC_GPR_BASE_ADDRS                    { IOMUXC_GPR_BASE }
+/* #define IOMUXC_GPR_BASE_ADDRS                    { IOMUXC_GPR_BASE } */
 /** Array initializer of IOMUXC_GPR peripheral base pointers */
-#define IOMUXC_GPR_BASE_PTRS                     { IOMUXC_GPR }
+/* #define IOMUXC_GPR_BASE_PTRS                     { IOMUXC_GPR } */
 
 /*!
  * @}
  */ /* end of group IOMUXC_GPR_Peripheral_Access_Layer */
-
+/* △△△ SNY 定義の重複解消 del △△△ */
 
 /* ----------------------------------------------------------------------------
    -- IRQSTEER Peripheral Access Layer
@@ -95594,21 +95601,21 @@ typedef struct {
  * @}
  */ /* end of group SRC_Register_Masks */
 
-
+/* ▽▽▽ SNY 定義の重複解消 del ▽▽▽ */
 /* SRC - Peripheral instance base addresses */
 /** Peripheral SRC base address */
-#define SRC_BASE                                 (0x30390000u)
+/* #define SRC_BASE                                 (0x30390000u) */
 /** Peripheral SRC base pointer */
-#define SRC                                      ((SRC_Type *)SRC_BASE)
+/* #define SRC                                      ((SRC_Type *)SRC_BASE) */
 /** Array initializer of SRC peripheral base addresses */
-#define SRC_BASE_ADDRS                           { SRC_BASE }
+/* #define SRC_BASE_ADDRS                           { SRC_BASE } */
 /** Array initializer of SRC peripheral base pointers */
-#define SRC_BASE_PTRS                            { SRC }
+/* #define SRC_BASE_PTRS                            { SRC } */
 
 /*!
  * @}
  */ /* end of group SRC_Peripheral_Access_Layer */
-
+/* △△△ SNY 定義の重複解消 del △△△ */
 
 /* ----------------------------------------------------------------------------
    -- SYS_CTR_COMPARE Peripheral Access Layer
@@ -97356,36 +97363,36 @@ typedef struct {
  * @}
  */ /* end of group UART_Register_Masks */
 
-
+/* ▽▽▽ SNY 定義の重複解消 del ▽▽▽ */
 /* UART - Peripheral instance base addresses */
 /** Peripheral UART1 base address */
-#define UART1_BASE                               (0x30860000u)
+/* #define UART1_BASE                               (0x30860000u) */
 /** Peripheral UART1 base pointer */
-#define UART1                                    ((UART_Type *)UART1_BASE)
+/* #define UART1                                    ((UART_Type *)UART1_BASE) */
 /** Peripheral UART2 base address */
-#define UART2_BASE                               (0x30890000u)
+/* #define UART2_BASE                               (0x30890000u) */
 /** Peripheral UART2 base pointer */
-#define UART2                                    ((UART_Type *)UART2_BASE)
+/* #define UART2                                    ((UART_Type *)UART2_BASE) */
 /** Peripheral UART3 base address */
-#define UART3_BASE                               (0x30880000u)
+/* #define UART3_BASE                               (0x30880000u) */
 /** Peripheral UART3 base pointer */
-#define UART3                                    ((UART_Type *)UART3_BASE)
+/* #define UART3                                    ((UART_Type *)UART3_BASE) */
 /** Peripheral UART4 base address */
-#define UART4_BASE                               (0x30A60000u)
+/* #define UART4_BASE                               (0x30A60000u) */
 /** Peripheral UART4 base pointer */
-#define UART4                                    ((UART_Type *)UART4_BASE)
+/* #define UART4                                    ((UART_Type *)UART4_BASE) */
 /** Array initializer of UART peripheral base addresses */
-#define UART_BASE_ADDRS                          { 0u, UART1_BASE, UART2_BASE, UART3_BASE, UART4_BASE }
+/* #define UART_BASE_ADDRS                          { 0u, UART1_BASE, UART2_BASE, UART3_BASE, UART4_BASE } */
 /** Array initializer of UART peripheral base pointers */
-#define UART_BASE_PTRS                           { (UART_Type *)0u, UART1, UART2, UART3, UART4 }
+/* #define UART_BASE_PTRS                           { (UART_Type *)0u, UART1, UART2, UART3, UART4 } */
 /** Interrupt vectors for the UART peripheral type */
-#define UART_IRQS                                { NotAvail_IRQn, UART1_IRQn, UART2_IRQn, UART3_IRQn, UART4_IRQn }
+/* #define UART_IRQS                                { NotAvail_IRQn, UART1_IRQn, UART2_IRQn, UART3_IRQn, UART4_IRQn } */
 
 /*!
  * @}
  */ /* end of group UART_Peripheral_Access_Layer */
 
-
+/* △△△ SNY 定義の重複解消 del △△△ */
 /* ----------------------------------------------------------------------------
    -- USB Peripheral Access Layer
    ---------------------------------------------------------------------------- */

@@ -23,6 +23,9 @@
 #include "kernel.h"
 #include "imx8mplus_uC3.h"
 #include "DDR_iMX_UART_cfg.h"
+#include "fsl_clock.h"
+#include "fsl_iomuxc.h"
+#include "sample_uart_cfg.h"
 
 /* Control DBGEN for the timer */
 #define TIMER_DBGEN         0x1     /* 0x0 for clear, 0x1 for set */
@@ -32,6 +35,8 @@
 static void uart_init(void);
 static void clock_init(void);
 static void timer_init(void);
+static void usdhc3_init(void);
+void usdhc3_dump_iomux(void);
 
 /*
  * Setup IOMUX pins and enable clock for UART
@@ -133,6 +138,129 @@ static void timer_init(void)
     REG_SYS_CTR_CTRL.CNTCR = tempreg;
 }
 
+static void usdhc3_init(void)
+{
+    /* USDHC3 root clock: SysPLL1/2 -> ~200MHz (mux=1, post=2) */
+    CLOCK_UpdateRoot(kCLOCK_RootUsdhc3, 1U, 1U, 2U);
+    CLOCK_EnableClock(kCLOCK_Usdhc3);
+
+    /* Pad config: drive + fast */
+    const uint32_t usdhc_pad_clk = IOMUXC_SW_PAD_CTL_PAD_DSE(6U) |
+                                   IOMUXC_SW_PAD_CTL_PAD_FSEL_MASK;
+    const uint32_t usdhc_pad_data = usdhc_pad_clk |
+                                    IOMUXC_SW_PAD_CTL_PAD_PUE_MASK |
+                                    IOMUXC_SW_PAD_CTL_PAD_PE_MASK |
+                                    IOMUXC_SW_PAD_CTL_PAD_HYS_MASK;
+
+    /* USDHC3 pins on ENET pads (EVK eMMC) */
+    IOMUXC_SetPinMux(IOMUXC_NAND_WE_B_USDHC3_CLK, 0U);
+    IOMUXC_SetPinConfig(IOMUXC_NAND_WE_B_USDHC3_CLK, usdhc_pad_clk);
+
+    IOMUXC_SetPinMux(IOMUXC_NAND_WP_B_USDHC3_CMD, 0U);
+    IOMUXC_SetPinConfig(IOMUXC_NAND_WP_B_USDHC3_CMD, usdhc_pad_data);
+
+    IOMUXC_SetPinMux(IOMUXC_NAND_DATA04_USDHC3_DATA0, 0U);
+    IOMUXC_SetPinConfig(IOMUXC_NAND_DATA04_USDHC3_DATA0, usdhc_pad_data);
+
+    IOMUXC_SetPinMux(IOMUXC_NAND_DATA05_USDHC3_DATA1, 0U);
+    IOMUXC_SetPinConfig(IOMUXC_NAND_DATA05_USDHC3_DATA1, usdhc_pad_data);
+
+    IOMUXC_SetPinMux(IOMUXC_NAND_DATA06_USDHC3_DATA2, 0U);
+    IOMUXC_SetPinConfig(IOMUXC_NAND_DATA06_USDHC3_DATA2, usdhc_pad_data);
+
+    IOMUXC_SetPinMux(IOMUXC_NAND_DATA07_USDHC3_DATA3, 0U);
+    IOMUXC_SetPinConfig(IOMUXC_NAND_DATA07_USDHC3_DATA3, usdhc_pad_data);
+
+    IOMUXC_SetPinMux(IOMUXC_NAND_RE_B_USDHC3_DATA4, 0U);
+    IOMUXC_SetPinConfig(IOMUXC_NAND_RE_B_USDHC3_DATA4, usdhc_pad_data);
+
+    IOMUXC_SetPinMux(IOMUXC_NAND_CE2_B_USDHC3_DATA5, 0U);
+    IOMUXC_SetPinConfig(IOMUXC_NAND_CE2_B_USDHC3_DATA5, usdhc_pad_data);
+
+    IOMUXC_SetPinMux(IOMUXC_NAND_CE3_B_USDHC3_DATA6, 0U);
+    IOMUXC_SetPinConfig(IOMUXC_NAND_CE3_B_USDHC3_DATA6, usdhc_pad_data);
+
+    IOMUXC_SetPinMux(IOMUXC_NAND_CLE_USDHC3_DATA7, 0U);
+    IOMUXC_SetPinConfig(IOMUXC_NAND_CLE_USDHC3_DATA7, usdhc_pad_data);
+#if 1
+    /* eMMC RESET_B */
+    IOMUXC_SetPinMux(IOMUXC_NAND_READY_B_USDHC3_RESET_B, 0U);
+    IOMUXC_SetPinConfig(IOMUXC_NAND_READY_B_USDHC3_RESET_B, usdhc_pad_data);
+#endif
+    /* HS200 strobe */
+    IOMUXC_SetPinMux(IOMUXC_NAND_CE1_B_USDHC3_STROBE, 0U);
+    IOMUXC_SetPinConfig(IOMUXC_NAND_CE1_B_USDHC3_STROBE, usdhc_pad_clk);
+#if 0
+    /* USDHC3 VSELECT */
+    IOMUXC_SetPinMux(IOMUXC_GPIO1_IO11_USDHC3_VSELECT, 0U);
+    IOMUXC_SetPinConfig(IOMUXC_GPIO1_IO11_USDHC3_VSELECT, usdhc_pad_data);
+#endif
+    _kernel_synch_cache();
+
+}
+
+void usdhc3_dump_iomux(void)
+{
+    UART_PRINTF("USDHC3 IOMUXC dump (MUX/PAD):\r\n");
+    UART_PRINTF(" CLK  NAND_WE_B      MUX=0x%08x PAD=0x%08x\r\n",
+                REG_IOMUXC_SW_MUX_CTL_PAD(SW_MUX_CTL_PAD_NAND_WE_B),
+                REG_IOMUXC_SW_PAD_CTL_PAD(SW_PAD_CTL_PAD_NAND_WE_B));
+    UART_PRINTF(" CMD  NAND_WP_B      MUX=0x%08x PAD=0x%08x\r\n",
+                REG_IOMUXC_SW_MUX_CTL_PAD(SW_MUX_CTL_PAD_NAND_WP_B),
+                REG_IOMUXC_SW_PAD_CTL_PAD(SW_PAD_CTL_PAD_NAND_WP_B));
+    UART_PRINTF(" DAT0 NAND_DATA04   MUX=0x%08x PAD=0x%08x\r\n",
+                REG_IOMUXC_SW_MUX_CTL_PAD(SW_MUX_CTL_PAD_NAND_DATA04),
+                REG_IOMUXC_SW_PAD_CTL_PAD(SW_PAD_CTL_PAD_NAND_DATA04));
+    UART_PRINTF(" DAT1 NAND_DATA05   MUX=0x%08x PAD=0x%08x\r\n",
+                REG_IOMUXC_SW_MUX_CTL_PAD(SW_MUX_CTL_PAD_NAND_DATA05),
+                REG_IOMUXC_SW_PAD_CTL_PAD(SW_PAD_CTL_PAD_NAND_DATA05));
+    UART_PRINTF(" DAT2 NAND_DATA06   MUX=0x%08x PAD=0x%08x\r\n",
+                REG_IOMUXC_SW_MUX_CTL_PAD(SW_MUX_CTL_PAD_NAND_DATA06),
+                REG_IOMUXC_SW_PAD_CTL_PAD(SW_PAD_CTL_PAD_NAND_DATA06));
+    UART_PRINTF(" DAT3 NAND_DATA07   MUX=0x%08x PAD=0x%08x\r\n",
+                REG_IOMUXC_SW_MUX_CTL_PAD(SW_MUX_CTL_PAD_NAND_DATA07),
+                REG_IOMUXC_SW_PAD_CTL_PAD(SW_PAD_CTL_PAD_NAND_DATA07));
+    UART_PRINTF(" DAT4 NAND_RE_B     MUX=0x%08x PAD=0x%08x\r\n",
+                REG_IOMUXC_SW_MUX_CTL_PAD(SW_MUX_CTL_PAD_NAND_RE_B),
+                REG_IOMUXC_SW_PAD_CTL_PAD(SW_PAD_CTL_PAD_NAND_RE_B));
+    UART_PRINTF(" DAT5 NAND_CE2_B    MUX=0x%08x PAD=0x%08x\r\n",
+                REG_IOMUXC_SW_MUX_CTL_PAD(SW_MUX_CTL_PAD_NAND_CE2_B),
+                REG_IOMUXC_SW_PAD_CTL_PAD(SW_PAD_CTL_PAD_NAND_CE2_B));
+    UART_PRINTF(" DAT6 NAND_CE3_B    MUX=0x%08x PAD=0x%08x\r\n",
+                REG_IOMUXC_SW_MUX_CTL_PAD(SW_MUX_CTL_PAD_NAND_CE3_B),
+                REG_IOMUXC_SW_PAD_CTL_PAD(SW_PAD_CTL_PAD_NAND_CE3_B));
+    UART_PRINTF(" DAT7 NAND_CLE      MUX=0x%08x PAD=0x%08x\r\n",
+                REG_IOMUXC_SW_MUX_CTL_PAD(SW_MUX_CTL_PAD_NAND_CLE),
+                REG_IOMUXC_SW_PAD_CTL_PAD(SW_PAD_CTL_PAD_NAND_CLE));
+    UART_PRINTF(" STRB NAND_CE1_B    MUX=0x%08x PAD=0x%08x\r\n",
+                REG_IOMUXC_SW_MUX_CTL_PAD(SW_MUX_CTL_PAD_NAND_CE1_B),
+                REG_IOMUXC_SW_PAD_CTL_PAD(SW_PAD_CTL_PAD_NAND_CE1_B));
+    UART_PRINTF(" RST  NAND_READY_B  MUX=0x%08x PAD=0x%08x\r\n",
+                REG_IOMUXC_SW_MUX_CTL_PAD(SW_MUX_CTL_PAD_NAND_READY_B),
+                REG_IOMUXC_SW_PAD_CTL_PAD(SW_PAD_CTL_PAD_NAND_READY_B));
+    UART_PRINTF(" VSEL GPIO1_IO11    MUX=0x%08x PAD=0x%08x\r\n",
+                REG_IOMUXC_SW_MUX_CTL_PAD(SW_MUX_CTL_PAD_GPIO1_IO11),
+                REG_IOMUXC_SW_PAD_CTL_PAD(SW_PAD_CTL_PAD_GPIO1_IO11));
+
+    UART_PRINTF("USDHC3 SELECT_INPUT dump:\r\n");
+    UART_PRINTF(" CLK_IN=0x%08x CMD_IN=0x%08x DAT0_IN=0x%08x DAT1_IN=0x%08x\r\n",
+                REG_IOMUXC_SELECT_INPUT(SELECT_INPUT_USDHC3_CARD_CLK_IN),
+                REG_IOMUXC_SELECT_INPUT(SELECT_INPUT_USDHC3_CMD_IN),
+                REG_IOMUXC_SELECT_INPUT(SELECT_INPUT_USDHC3_DAT0_IN),
+                REG_IOMUXC_SELECT_INPUT(SELECT_INPUT_USDHC3_DAT1_IN));
+    UART_PRINTF(" DAT2_IN=0x%08x DAT3_IN=0x%08x DAT4_IN=0x%08x DAT5_IN=0x%08x\r\n",
+                REG_IOMUXC_SELECT_INPUT(SELECT_INPUT_USDHC3_DAT2_IN),
+                REG_IOMUXC_SELECT_INPUT(SELECT_INPUT_USDHC3_DAT3_IN),
+                REG_IOMUXC_SELECT_INPUT(SELECT_INPUT_USDHC3_DAT4_IN),
+                REG_IOMUXC_SELECT_INPUT(SELECT_INPUT_USDHC3_DAT5_IN));
+    UART_PRINTF(" DAT6_IN=0x%08x DAT7_IN=0x%08x STROBE=0x%08x CARD_DET=0x%08x WP_ON=0x%08x\r\n",
+                REG_IOMUXC_SELECT_INPUT(SELECT_INPUT_USDHC3_DAT6_IN),
+                REG_IOMUXC_SELECT_INPUT(SELECT_INPUT_USDHC3_DAT7_IN),
+                REG_IOMUXC_SELECT_INPUT(SELECT_INPUT_USDHC3_STROBE),
+                REG_IOMUXC_SELECT_INPUT(SELECT_INPUT_USDHC3_CARD_DET),
+                REG_IOMUXC_SELECT_INPUT(SELECT_INPUT_USDHC3_WP_ON));
+}
+
 /*
  * Initialize hardware
  */
@@ -140,5 +268,6 @@ void hw_init(void)
 {
     clock_init();
     uart_init();
+    usdhc3_init();
     timer_init();
 }

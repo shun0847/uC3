@@ -21,6 +21,8 @@
 /*******************************************************************************
  * Definitons
  ******************************************************************************/
+#define UC3_PART_START_LBA   819200
+#define UC3_PART_SECTORS     524288
 
 /*******************************************************************************
  * Prototypes
@@ -44,7 +46,13 @@ DRESULT mmc_disk_write(BYTE pdrv, const BYTE* buff, LBA_t sector, UINT count)
         return RES_PARERR;
     }
 
-    if (kStatus_Success != MMC_WriteBlocks(&g_mmc, buff, sector, count))
+    if ((sector + count) > UC3_PART_SECTORS) {
+        return RES_PARERR;
+    }
+
+    LBA_t phys = UC3_PART_START_LBA + sector;
+
+    if (kStatus_Success != MMC_WriteBlocks(&g_mmc, buff, phys, count))
     {
         return RES_ERROR;
     }
@@ -58,7 +66,13 @@ DRESULT mmc_disk_read(BYTE pdrv, BYTE* buff, LBA_t sector, UINT count)
         return RES_PARERR;
     }
 
-    if (kStatus_Success != MMC_ReadBlocks(&g_mmc, buff, sector, count))
+    if ((sector + count) > UC3_PART_SECTORS) {
+        return RES_PARERR;
+    }
+    
+    LBA_t phys = UC3_PART_START_LBA + sector;
+
+    if (kStatus_Success != MMC_ReadBlocks(&g_mmc, buff, phys, count))
     {
         return RES_ERROR;
     }
@@ -79,7 +93,9 @@ DRESULT mmc_disk_ioctl(BYTE pdrv, BYTE cmd, void* buff)
         case GET_SECTOR_COUNT:
             if (buff)
             {
-                *(uint32_t *)buff = g_mmc.userPartitionBlocks;
+                //*(uint32_t *)buff = g_mmc.userPartitionBlocks;
+                *(uint32_t *)buff = UC3_PART_SECTORS;
+
             }
             else
             {
@@ -148,7 +164,6 @@ DSTATUS mmc_disk_initialize(BYTE pdrv)
         memset(&g_mmc, 0U, sizeof(g_mmc));
         return STA_NOINIT;
     }
-
     isCardInitialized = true;
 
     return RES_OK;

@@ -1,22 +1,30 @@
 # Author has to know the difference among '?=', '=', '+=' and ':='
 
 # Sample application name (used for the output file name)
-TARGET ?= sample_uart
+TARGET ?= sample_fatfs
 
 # Use FPU or not (yes or no)
 USE_FPU = no
 
 # Code optimization option
-OPT = -O2
+OPT = -O0
 
 # Use CSIDE or not (yes or no)
-DBG_ON = no
+DBG_ON = yes
 
 # Directory definition
-PRJTOP ?= $(shell pwd)
+#PRJTOP ?= $(shell pwd)
+
+###Omitting arguments###
+PRJTOP ?= $(CURDIR)
 SRCTOP = $(PRJTOP)/../../src
 DRVTOP = $(PRJTOP)/../../../../../../Driver/Standard
 KERTOP = $(PRJTOP)/../../../../../../Kernel/Standard
+
+ARCHTOP    = $(PRJTOP)/../../CMSIS/Core_AArch64
+NXPCOMPTOP = $(PRJTOP)/../../components
+NXPDRVTOP  = $(PRJTOP)/../../drivers
+NXPMWTOP   = $(PRJTOP)/../../middleware
 
 # Debug symbol option
 ifeq ($(DBG_ON),no)
@@ -52,6 +60,19 @@ C_FILES		=	$(wildcard $(SRCTOP)/*.c) \
 				$(wildcard $(DRVTOP)/src/GCC/DDR_AArch64_GICv3_sub.c) \
 				$(wildcard $(DRVTOP)/src/GCC/DDR_AArch64_GTIMER_sub.c)
 
+C_FILES		+= 	$(wildcard $(ARCHTOP)/CMSIS/Core_AArch64/Source/*.c) \
+				$(wildcard $(NXPCOMPTOP)/lists/*.c) \
+				$(wildcard $(NXPCOMPTOP)/osa/*.c)  \
+				$(wildcard $(NXPDRVTOP)/common/*.c) \
+				$(wildcard $(NXPDRVTOP)/device/*.c) \
+				$(wildcard $(NXPDRVTOP)/usdhc/*.c) \
+				$(wildcard $(NXPMWTOP)/fatfs/source/*.c) \
+				$(wildcard $(NXPMWTOP)/fatfs/source/fsl_mmc_disk/*.c) \
+				$(wildcard $(NXPMWTOP)/sdmmc/common/*.c) \
+				$(wildcard $(NXPMWTOP)/sdmmc/host/usdhc/blocking/*.c) \
+				$(wildcard $(NXPMWTOP)/sdmmc/osa/*.c) \
+				$(wildcard $(NXPMWTOP)/sdmmc/mmc/*.c) 
+
 # Object file components
 OBJS	:= $(ASM_FILES:.S=.o) $(C_FILES:.c=.o)
 
@@ -71,10 +92,28 @@ INCLUDES	+= -I$(KERTOP)/inc/AArch64
 INCLUDES	+= -I$(DRVTOP)/inc
 INCLUDES	+= -I$(SRCTOP)
 
+INCLUDES     += -I$(ARCHTOP)/Include
+INCLUDES	 += -I$(NXPCOMPTOP)/lists
+INCLUDES	 += -I$(NXPCOMPTOP)/osa
+INCLUDES	 += -I$(NXPCOMPTOP)/osa/config
+INCLUDES     += -I$(NXPDRVTOP)/device 
+INCLUDES     += -I$(NXPDRVTOP)/common
+INCLUDES     += -I$(NXPDRVTOP)/usdhc
+INCLUDES     += -I$(NXPMWTOP)/fatfs/source
+INCLUDES     += -I$(NXPMWTOP)/fatfs/source/fsl_mmc_disk
+INCLUDES     += -I$(NXPMWTOP)/sdmmc/common
+INCLUDES     += -I$(NXPMWTOP)/sdmmc/host/usdhc
+INCLUDES     += -I$(NXPMWTOP)/sdmmc/osa
+INCLUDES     += -I$(NXPMWTOP)/sdmmc/mmc
+
+
 # Compiler macro definition
 define add_define
 DEFINES	+= -D$(1)$(if $(value $(1)),=$(value $(1)),)
 endef
+DEFINES += -DCPU_MIMX8ML8DVNLZ_ca53
+DEFINES += -DMMC_ENABLED
+DEFINES += -D__STARTUP_INITIALIZE_NONCACHEDATA
 
 # Compiler flags
 ASFLAGS			= -mcpu=${MCPU} -nostdinc -ffreestanding -Wa,--fatal-warnings \
@@ -88,14 +127,24 @@ CPPFLAGS		= $(CONFIG_FLAG) $(DEFINES) $(INCLUDES) -nostartfiles -L$(KERTOP) $(CF
 CPPFLAGS		+= -Wall -nostdlib
 
 # Compiler command related definition
-CC			= $(CROSS_COMPILE)gcc
-AS			= $(CROSS_COMPILE)gcc
-LD			= $(CROSS_COMPILE)ld
-NM			= $(CROSS_COMPILE)nm
-OBJCOPY		= $(CROSS_COMPILE)objcopy
-OBJDUMP		= $(CROSS_COMPILE)objdump
-STRIP		= $(CROSS_COMPILE)strip
-AR			= $(CROSS_COMPILE)ar
+#CC			= $(CROSS_COMPILE)gcc
+#AS			= $(CROSS_COMPILE)gcc
+#LD			= $(CROSS_COMPILE)ld
+#NM			= $(CROSS_COMPILE)nm
+#OBJCOPY		= $(CROSS_COMPILE)objcopy
+#OBJDUMP		= $(CROSS_COMPILE)objdump
+#STRIP		= $(CROSS_COMPILE)strip
+#AR			= $(CROSS_COMPILE)ar
+
+###Omitting arguments###
+CC			= aarch64-none-elf-gcc
+AS			= aarch64-none-elf-gcc
+LD			= aarch64-none-elf-ld
+NM			= aarch64-none-elf-nm
+OBJCOPY		= aarch64-none-elf-objcopy
+OBJDUMP		= aarch64-none-elf-objdump
+STRIP		= aarch64-none-elf-strip
+AR			= aarch64-none-elf-ar
 
 # file related command definition
 CP	= /bin/cp

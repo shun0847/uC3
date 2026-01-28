@@ -16,10 +16,8 @@
 #ifdef MMC_ENABLED
 #include "fsl_mmc.h"
 #endif
-#ifdef SDIO_ENABLED
-#include "fsl_sdio.h"
-#endif
-#include "clock_config.h"
+
+//#include "clock_config.h"
 #include "fsl_sdmmc_host.h"
 #include "fsl_sdmmc_common.h"
 
@@ -27,21 +25,9 @@
  * Definitions
  ******************************************************************************/
 /* @brief host basic configuration */
-#if defined(USDHC0)
-#define BOARD_SDMMC_SD_HOST_BASEADDR   USDHC0
-#define BOARD_SDMMC_SD_HOST_IRQ        USDHC0_IRQn
-#define BOARD_SDMMC_MMC_HOST_BASEADDR  USDHC0
-#define BOARD_SDMMC_MMC_HOST_IRQ       USDHC0_IRQn
-#define BOARD_SDMMC_SDIO_HOST_BASEADDR USDHC0
-#define BOARD_SDMMC_SDIO_HOST_IRQ      USDHC0_IRQn
-#elif defined(USDHC1)
-#define BOARD_SDMMC_SD_HOST_BASEADDR   USDHC1
-#define BOARD_SDMMC_SD_HOST_IRQ        USDHC1_IRQn
-#define BOARD_SDMMC_MMC_HOST_BASEADDR  USDHC1
-#define BOARD_SDMMC_MMC_HOST_IRQ       USDHC1_IRQn
-#define BOARD_SDMMC_SDIO_HOST_BASEADDR USDHC1
-#define BOARD_SDMMC_SDIO_HOST_IRQ      USDHC1_IRQn
-#endif
+#define BOARD_SDMMC_MMC_HOST_BASEADDR  USDHC3
+#define BOARD_SDMMC_MMC_HOST_IRQ       USDHC3_IRQn
+
 /* @brief card detect configuration */
 #define BOARD_SDMMC_SD_CD_GPIO_BASE        GPIO2
 #define BOARD_SDMMC_SD_CD_GPIO_PIN         28u
@@ -65,10 +51,10 @@
 #define BOARD_SDMMC_SD_IO_VOLTAGE_CONTROL_TYPE kSD_IOVoltageCtrlByHost
 
 #define BOARD_SDMMC_SD_HOST_SUPPORT_SDR104_FREQ (200000000U)
-#define BOARD_SDMMC_MMC_HOST_SUPPORT_HS200_FREQ (180000000U)
+#define BOARD_SDMMC_MMC_HOST_SUPPORT_HS200_FREQ (52000000U)
 /*! @brief mmc configuration */
 #define BOARD_SDMMC_MMC_VCC_SUPPLY  kMMC_VoltageWindows270to360
-#define BOARD_SDMMC_MMC_VCCQ_SUPPLY kMMC_VoltageWindows270to360
+#define BOARD_SDMMC_MMC_VCCQ_SUPPLY kMMC_VoltageWindow170to195
 /*! @brief align with cache line size */
 #define BOARD_SDMMC_DATA_BUFFER_ALIGN_SIZE (32U)
 
@@ -99,16 +85,6 @@ void BOARD_SD_Config(void *card, sd_cd_t cd, uint32_t hostIRQPriority, void *use
 #endif
 
 /*!
- * @brief BOARD SDIO configurations.
- * @param card card descriptor
- * @param cd card detect callback
- * @param cardInt card interrupt
- */
-#ifdef SDIO_ENABLED
-void BOARD_SDIO_Config(void *card, sd_cd_t cd, uint32_t hostIRQPriority, sdio_int_t cardInt);
-#endif
-
-/*!
  * @brief BOARD MMC configurations.
  * @param card card descriptor
  * @param cd card detect callback
@@ -116,7 +92,6 @@ void BOARD_SDIO_Config(void *card, sd_cd_t cd, uint32_t hostIRQPriority, sdio_in
  */
 #ifdef MMC_ENABLED
 void BOARD_MMC_Config(void *card, uint32_t hostIRQPriority);
-
 #endif
 
 #if defined(__cplusplus)

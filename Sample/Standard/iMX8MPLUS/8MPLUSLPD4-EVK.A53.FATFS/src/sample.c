@@ -15,11 +15,12 @@
 #include "DDR_AArch64_GTIMER.h"
 #include "DDR_AArch64_GTIMER_cfg.h"
 #include "kernel_cfg.h"
+#include "fsl_usdhc.h"
 
 /* External function prototypes ----------------------------------------------*/
-
 extern void hw_init(void);
-extern void sample_uart_start(void);
+extern ER sample_uart_start(void);
+extern int sample_fatfs_start(void);
 extern void synchronous_exception_handler(UD esr, UD far, UD sp);
 extern void system_error_handler(UD esr, UD far, UD sp);
 
@@ -49,6 +50,7 @@ void MainTask(VP_INT exinf)
  */
 static void initpr(void)
 {
+    int ret;
     const T_DEXC dexc_sync = {
         TA_HLNG,
         (FP)synchronous_exception_handler
@@ -74,6 +76,7 @@ static void initpr(void)
     (void)_ddr_aarch64_gtimer_init(CFG_KRN_TICK, CFG_GTIMER_CLK);
     (void)acre_tsk((T_CTSK *)&ctsk_main);
     sample_uart_start();
+    sample_fatfs_start();
 }
 
 /*

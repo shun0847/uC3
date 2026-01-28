@@ -15,6 +15,7 @@
 #ifndef SAMPLE_UART_CFG_H_
 #define SAMPLE_UART_CFG_H_
 
+#include "DDR_COM.h"
 #include "DDR_iMX_UART.h"
 #include "DDR_iMX_UART_cfg.h"
 #include "cpu_cfg.h"
@@ -38,6 +39,12 @@ extern "C" {
 #define CFG_FLW             (FLW_NONE)
 
 #define DDR_UART_INIT_FN    (_ddr_imx_uart_init)
+
+#define UART_PRINTF_BUF_SIZE (512U)
+
+extern void UART_PRINTF(const char *fmt, ...);
+extern void UART_PUTCHAR(char ch);
+extern char UART_GETCHAR(void);
 
 #ifdef __cplusplus
 }
