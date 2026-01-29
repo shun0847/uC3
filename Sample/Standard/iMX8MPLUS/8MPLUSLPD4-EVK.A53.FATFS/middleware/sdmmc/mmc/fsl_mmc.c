@@ -1059,9 +1059,7 @@ static status_t MMC_SendExtendedCsd(mmc_card_t *card, uint8_t *targetAddr, uint3
     sdmmchost_cmd_t command      = {0};
     sdmmchost_transfer_t content = {0};
     sdmmchost_data_t data        = {0};
-    /* Use non-cacheable buffer to avoid DMA/MMU issues when reading EXT_CSD. */
-    AT_NONCACHEABLE_SECTION_ALIGN(static uint32_t s_extCsdBuf[MMC_EXTENDED_CSD_BYTES / 4U], 64U);
-    uint32_t *alignBuffer        = s_extCsdBuf;
+    uint32_t *alignBuffer        = (uint32_t *)FSL_SDMMC_CARD_INTERNAL_BUFFER_ALIGN_ADDR(card->internalBuffer);
     status_t error               = kStatus_Success;
 
     /* Legacy mmc card , do not support the command */
@@ -1304,9 +1302,7 @@ static status_t MMC_TestDataBusWidth(mmc_card_t *card, mmc_data_bus_width_t widt
 
     uint32_t blockSize       = 0U;
     uint32_t tempsendPattern = 0U;
-    /* Use non-cacheable buffer to avoid DMA/MMU issues during bus width test. */
-    AT_NONCACHEABLE_SECTION_ALIGN(static uint32_t s_busWidthBuf[2U], 64U);
-    uint32_t *tempPattern    = s_busWidthBuf;
+    uint32_t *tempPattern    = (uint32_t *)FSL_SDMMC_CARD_INTERNAL_BUFFER_ALIGN_ADDR(card->internalBuffer);
     uint32_t xorMask         = 0U;
     uint32_t xorResult       = 0U;
 
