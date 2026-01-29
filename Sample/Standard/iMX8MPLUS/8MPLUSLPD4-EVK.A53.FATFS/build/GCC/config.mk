@@ -69,9 +69,16 @@ C_FILES		+= 	$(wildcard $(ARCHTOP)/CMSIS/Core_AArch64/Source/*.c) \
 				$(wildcard $(NXPMWTOP)/fatfs/source/*.c) \
 				$(wildcard $(NXPMWTOP)/fatfs/source/fsl_mmc_disk/*.c) \
 				$(wildcard $(NXPMWTOP)/sdmmc/common/*.c) \
-				$(wildcard $(NXPMWTOP)/sdmmc/host/usdhc/blocking/*.c) \
 				$(wildcard $(NXPMWTOP)/sdmmc/osa/*.c) \
 				$(wildcard $(NXPMWTOP)/sdmmc/mmc/*.c) 
+
+# SDMMC host mode switch: blocking | non_blocking
+SDMMC_HOST_MODE ?= non_blocking
+ifeq ($(SDMMC_HOST_MODE),non_blocking)
+C_FILES		+=	$(NXPMWTOP)/sdmmc/host/usdhc/non_blocking/fsl_sdmmc_host.c
+else
+C_FILES		+=	$(NXPMWTOP)/sdmmc/host/usdhc/blocking/fsl_sdmmc_host.c
+endif
 
 # Object file components
 OBJS	:= $(ASM_FILES:.S=.o) $(C_FILES:.c=.o)

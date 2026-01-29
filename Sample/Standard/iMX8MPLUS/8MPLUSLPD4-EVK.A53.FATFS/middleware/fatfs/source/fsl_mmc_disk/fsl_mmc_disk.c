@@ -18,6 +18,7 @@
 #include "fsl_mmc.h"
 #include "fsl_mmc_disk.h"
 #include "diskio.h"
+#include "sample_fatfs_cfg.h"
 /*******************************************************************************
  * Definitons
  ******************************************************************************/
@@ -33,7 +34,7 @@
  ******************************************************************************/
 
 /*! @brief Card descriptor */
-mmc_card_t g_mmc;
+AT_NONCACHEABLE_SECTION_ALIGN(mmc_card_t g_mmc, SDMMC_DATA_BUFFER_ALIGN_CACHE);
 
 /*******************************************************************************
  * Code

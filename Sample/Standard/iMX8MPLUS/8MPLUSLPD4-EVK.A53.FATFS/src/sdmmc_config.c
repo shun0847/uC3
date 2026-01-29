@@ -9,13 +9,17 @@
 #include "imx8mplus_uC3.h"
 #include "kernel.h"
 #include "fsl_clock.h"
+#include "fsl_usdhc.h"
+#include "sample_fatfs_cfg.h"
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
+#define USDHC3_ISR_IMASK (0xE0U)
 
 /*******************************************************************************
  * Prototypes
  ******************************************************************************/
+static void USDHC3_ISR(VP_INT exinf);
 
 /*******************************************************************************
  * Variables
@@ -30,6 +34,7 @@ SDK_ALIGN(static uint8_t s_sdmmcCacheLineAlignBuffer[BOARD_SDMMC_DATA_BUFFER_ALI
 #endif
 
 sdmmchost_t s_host;
+static T_CISR s_usdhc3_cisr = {TA_HLNG, 0, INT_USDHC3, (FP)USDHC3_ISR, USDHC3_ISR_IMASK};
 
 /*******************************************************************************
  * Code
@@ -70,10 +75,34 @@ void BOARD_MMC_Config(void *card, uint32_t hostIRQPriority)
     ((mmc_card_t *)card)->hostVoltageWindowVCC  = BOARD_SDMMC_MMC_VCC_SUPPLY;
     ((mmc_card_t *)card)->hostVoltageWindowVCCQ = BOARD_SDMMC_MMC_VCCQ_SUPPLY;
 
+    (void)hostIRQPriority;
+
+    {
+        ER_ID ercd_isr = acre_isr(&s_usdhc3_cisr);
+        ER ercd_dis    = dis_int(INT_USDHC3);
+        ER ercd_ena    = ena_int(INT_USDHC3);
+
+    }
+
 #if defined(__GIC_PRIO_BITS)
-        GIC_SetPriority(BOARD_SDMMC_MMC_HOST_IRQ, hostIRQPriority);
+    GIC_SetPriority(BOARD_SDMMC_MMC_HOST_IRQ, hostIRQPriority);
+    GIC_EnableIRQ(BOARD_SDMMC_MMC_HOST_IRQ);
 #else
-        NVIC_SetPriority(BOARD_SDMMC_MMC_HOST_IRQ, hostIRQPriority);
+    NVIC_SetPriority(BOARD_SDMMC_MMC_HOST_IRQ, hostIRQPriority);
+    NVIC_EnableIRQ(BOARD_SDMMC_MMC_HOST_IRQ);
 #endif
 }
 #endif
+
+void USDHC3_IRQHandler(void)
+{
+    extern volatile uint32_t g_usdhc3_irq_count;
+    g_usdhc3_irq_count++;
+    USDHC_TransferHandleIRQ(BOARD_SDMMC_MMC_HOST_BASEADDR, &s_host.handle);
+}
+
+static void USDHC3_ISR(VP_INT exinf)
+{
+    (void)exinf;
+    USDHC3_IRQHandler();
+}

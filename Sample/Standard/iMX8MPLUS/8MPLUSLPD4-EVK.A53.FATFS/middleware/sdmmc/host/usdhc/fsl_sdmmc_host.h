@@ -13,7 +13,6 @@
 #include "fsl_sdmmc_osa.h"
 #include "fsl_usdhc.h"
 
-
 /*!
  * @addtogroup sdmmchost_usdhc
  * @ingroup sdmmchost

@@ -1021,7 +1021,6 @@ uint32_t USDHC_SetSdClock(USDHC_Type *base, uint32_t srcClock_Hz, uint32_t busCl
     assert(srcClock_Hz != 0U);
     assert(busClock_Hz != 0U);
 
-
     uint32_t totalDiv         = 0UL;
     uint32_t divisor          = 0UL;
     uint32_t prescaler        = 0UL;
@@ -1123,7 +1122,6 @@ uint32_t USDHC_SetSdClock(USDHC_Type *base, uint32_t srcClock_Hz, uint32_t busCl
     while (!IS_USDHC_FLAG_SET(base->PRES_STATE, USDHC_PRES_STATE_SDSTB_MASK))
     {
     }
-
 
     return nearestFrequency;
 }
@@ -2487,6 +2485,9 @@ void USDHC_TransferHandleIRQ(USDHC_Type *base, usdhc_handle_t *handle)
     uint32_t interruptFlags;
 
     interruptFlags = USDHC_GetEnabledInterruptStatusFlags(base);
+    if (interruptFlags != 0U)
+    {
+    }
 
     if (IS_USDHC_FLAG_SET(interruptFlags, kUSDHC_CardDetectFlag))
     {
