@@ -62,7 +62,6 @@ C_FILES		=	$(wildcard $(SRCTOP)/*.c) \
 
 C_FILES		+= 	$(wildcard $(ARCHTOP)/CMSIS/Core_AArch64/Source/*.c) \
 				$(wildcard $(NXPCOMPTOP)/lists/*.c) \
-				$(wildcard $(NXPCOMPTOP)/osa/*.c)  \
 				$(wildcard $(NXPDRVTOP)/common/*.c) \
 				$(wildcard $(NXPDRVTOP)/device/*.c) \
 				$(wildcard $(NXPDRVTOP)/usdhc/*.c) \
@@ -72,6 +71,7 @@ C_FILES		+= 	$(wildcard $(ARCHTOP)/CMSIS/Core_AArch64/Source/*.c) \
 				$(wildcard $(NXPMWTOP)/sdmmc/osa/*.c) \
 				$(wildcard $(NXPMWTOP)/sdmmc/mmc/*.c) 
 
+C_FILES		+=	$(NXPCOMPTOP)/osa/fsl_os_abstraction_bm.c
 # SDMMC host mode switch: blocking | non_blocking
 SDMMC_HOST_MODE ?= non_blocking
 ifeq ($(SDMMC_HOST_MODE),non_blocking)
