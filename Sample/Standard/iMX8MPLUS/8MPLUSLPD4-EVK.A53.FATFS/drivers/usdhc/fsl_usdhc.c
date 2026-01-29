@@ -752,13 +752,11 @@ static status_t USDHC_WaitCommandDone(USDHC_Type *base, usdhc_command_t *command
             {
                 if (!s_cmd1ErrorLogged)
                 {
-                    SDMMC_LOG("USDHC CMD error\r\n");
                     s_cmd1ErrorLogged = true;
                 }
             }
             else
             {
-                SDMMC_LOG("USDHC CMD error\r\n");
             }
         }
 
@@ -1023,7 +1021,6 @@ uint32_t USDHC_SetSdClock(USDHC_Type *base, uint32_t srcClock_Hz, uint32_t busCl
     assert(srcClock_Hz != 0U);
     assert(busClock_Hz != 0U);
 
-    SDMMC_LOG("USDHC_SetSdClock: src=%uHz target=%uHz\r\n", srcClock_Hz, busClock_Hz);
 
     uint32_t totalDiv         = 0UL;
     uint32_t divisor          = 0UL;
@@ -1127,7 +1124,6 @@ uint32_t USDHC_SetSdClock(USDHC_Type *base, uint32_t srcClock_Hz, uint32_t busCl
     {
     }
 
-    SDMMC_LOG("USDHC_SetSdClock: actual=%uHz\r\n", nearestFrequency);
 
     return nearestFrequency;
 }

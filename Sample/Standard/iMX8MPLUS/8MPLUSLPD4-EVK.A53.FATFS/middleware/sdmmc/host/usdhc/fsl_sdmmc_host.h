@@ -13,33 +13,6 @@
 #include "fsl_sdmmc_osa.h"
 #include "fsl_usdhc.h"
 
-extern void UART_PRINTF(const char *fmt_s, ...);
-
-/* SDMMC debug log control */
-#ifndef SDMMC_DEBUG_LOG
-#define SDMMC_DEBUG_LOG 0
-#endif
-#if SDMMC_DEBUG_LOG
-#define SDMMC_LOG(...) UART_PRINTF(__VA_ARGS__)
-#else
-#define SDMMC_LOG(...) \
-    do                 \
-    {                  \
-    } while (0)
-#endif
-
-/* Keep minimal DMA-related logs even when SDMMC_DEBUG_LOG is off. */
-#ifndef SDMMC_DMA_LOG
-#define SDMMC_DMA_LOG 0
-#endif
-#if SDMMC_DMA_LOG
-#define SDMMC_DMA_LOGF(...) UART_PRINTF(__VA_ARGS__)
-#else
-#define SDMMC_DMA_LOGF(...) \
-    do                      \
-    {                       \
-    } while (0)
-#endif
 
 /*!
  * @addtogroup sdmmchost_usdhc
@@ -278,7 +251,6 @@ static inline void SDMMCHOST_SendCardActive(sdmmchost_t *host)
  */
 static inline uint32_t SDMMCHOST_SetCardClock(sdmmchost_t *host, uint32_t targetClock)
 {
-    SDMMC_LOG("SDMMCHOST_SetCardClock: targetClock=%lu\r\n", targetClock);
     return USDHC_SetSdClock(host->hostController.base, host->hostController.sourceClock_Hz, targetClock);
 }
 

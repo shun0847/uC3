@@ -49,12 +49,9 @@ ffconf.h:
 lscript.ld: NonCacheableセクションを配置 
 
 課題
-eMMCのバスモード
-HighSpeed(52MHz)
-HS200(200MHz)は動作せず
+eMMCのバスモード、チューニング問題
+HighSpeed(52MHz)動作  HS200(200MHz)は動作せず
 →転送速度が遅い
-DMA無効
-→CPU負荷増大、割込み遅延
 
 
 ボード依存ファイル参考
