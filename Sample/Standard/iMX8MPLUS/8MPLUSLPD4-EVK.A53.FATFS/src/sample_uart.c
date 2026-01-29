@@ -214,6 +214,10 @@ void UART_PUTCHAR(char ch)
 char UART_GETCHAR(void)
 {
     VB ch;
-    getc_com(ID_UART, &ch, 0, 10);
+    ER ercd;
+    do
+    {
+        ercd = getc_com(ID_UART, &ch, NULL, TMO_FEVR);
+    } while (ercd != E_OK);
     return (char)ch;
 }

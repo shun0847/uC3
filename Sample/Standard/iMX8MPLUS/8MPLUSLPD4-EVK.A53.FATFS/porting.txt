@@ -49,15 +49,12 @@ ffconf.h:
 lscript.ld: NonCacheableセクションを配置 
 
 課題
-usdhcのMMC操作についてblockingかnon_blockingか？
-ベアメタル実装で問題ないか？
-Cache、DMA、排他(Aコア依存部) も考慮するべきか？
-- 依存要素：時間・タイマ、割込み制御、タスク・スケジューリング、同期プリミティブ(sem, mutex, event, msgQ)、割込みハンドラ登録
-
-LinuxBSPの対応層をそのまま移植？
-・同期/タスク/イベントは カーネルAPI（mutex, waitqueue, completion など)
-・SD/MMCはカーネルのMMCサブシステムに統合されたドライバ
-→アーキ+OSA依存を再実装する必要あり
+eMMCのバスモード
+HighSpeed(52MHz)
+HS200(200MHz)は動作せず
+→転送速度が遅い
+DMA無効
+→CPU負荷増大、割込み遅延
 
 
 ボード依存ファイル参考

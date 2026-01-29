@@ -7,6 +7,7 @@
  */
 
 #include "fsl_usdhc.h"
+#include "fsl_sdmmc_host.h"
 #if defined(FSL_SDK_ENABLE_DRIVER_CACHE_CONTROL) && FSL_SDK_ENABLE_DRIVER_CACHE_CONTROL
 #include "fsl_cache.h"
 #endif /* FSL_SDK_ENABLE_DRIVER_CACHE_CONTROL */
@@ -14,7 +15,6 @@
 #include "fsl_memory.h"
 #endif
 
-extern void UART_PRINTF(const char *fmt, ...);
 static bool s_cmd1ErrorLogged;
 /*******************************************************************************
  * Definitions
@@ -752,17 +752,13 @@ static status_t USDHC_WaitCommandDone(USDHC_Type *base, usdhc_command_t *command
             {
                 if (!s_cmd1ErrorLogged)
                 {
-                    UART_PRINTF(
-                        "USDHC CMD error: INT_STATUS=0x%08x PRES=0x%08x CMD_ARG=0x%08x CMD_XFR=0x%08x SYS_CTRL=0x%08x\r\n",
-                        interruptStatus, base->PRES_STATE, base->CMD_ARG, base->CMD_XFR_TYP, base->SYS_CTRL);
+                    SDMMC_LOG("USDHC CMD error\r\n");
                     s_cmd1ErrorLogged = true;
                 }
             }
             else
             {
-                UART_PRINTF(
-                    "USDHC CMD error: INT_STATUS=0x%08x PRES=0x%08x CMD_ARG=0x%08x CMD_XFR=0x%08x SYS_CTRL=0x%08x\r\n",
-                    interruptStatus, base->PRES_STATE, base->CMD_ARG, base->CMD_XFR_TYP, base->SYS_CTRL);
+                SDMMC_LOG("USDHC CMD error\r\n");
             }
         }
 
@@ -1027,6 +1023,8 @@ uint32_t USDHC_SetSdClock(USDHC_Type *base, uint32_t srcClock_Hz, uint32_t busCl
     assert(srcClock_Hz != 0U);
     assert(busClock_Hz != 0U);
 
+    SDMMC_LOG("USDHC_SetSdClock: src=%uHz target=%uHz\r\n", srcClock_Hz, busClock_Hz);
+
     uint32_t totalDiv         = 0UL;
     uint32_t divisor          = 0UL;
     uint32_t prescaler        = 0UL;
@@ -1128,6 +1126,8 @@ uint32_t USDHC_SetSdClock(USDHC_Type *base, uint32_t srcClock_Hz, uint32_t busCl
     while (!IS_USDHC_FLAG_SET(base->PRES_STATE, USDHC_PRES_STATE_SDSTB_MASK))
     {
     }
+
+    SDMMC_LOG("USDHC_SetSdClock: actual=%uHz\r\n", nearestFrequency);
 
     return nearestFrequency;
 }
@@ -2548,3 +2548,4 @@ void USDHC2_DriverIRQHandler(void)
 }
 
 #endif
+

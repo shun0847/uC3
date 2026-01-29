@@ -13,6 +13,9 @@
 #include "fsl_cache.h"
 #endif
 #endif
+#if defined(__aarch64__)
+#include "cache_armv8a.h"
+#endif
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
@@ -174,6 +177,21 @@ status_t SDMMCHOST_TransferFunction(sdmmchost_t *host, sdmmchost_transfer_t *con
         dmaConfig.admaTable      = host->dmaDesBuffer;
         dmaConfig.admaTableWords = host->dmaDesBufferWordsNum;
 
+#if defined(__aarch64__)
+        /* Cache maintenance for DMA buffers on AArch64. */
+        uintptr_t dmaBuf = (uintptr_t)(content->data->txData == NULL ? content->data->rxData : content->data->txData);
+        size_t dmaSize   = (size_t)content->data->blockSize * (size_t)content->data->blockCount;
+        if ((content->data->txData != NULL) && (dmaSize != 0U))
+        {
+            dcache_clean_range(dmaBuf, dmaSize);
+        }
+        if ((content->data->rxData != NULL) && (dmaSize != 0U))
+        {
+            /* Invalidate before DMA to avoid write-back of stale lines. */
+            dcache_invalidate_range(dmaBuf, dmaSize);
+        }
+#endif
+
 #if ((defined __DCACHE_PRESENT) && __DCACHE_PRESENT) || (defined FSL_FEATURE_HAS_L1CACHE && FSL_FEATURE_HAS_L1CACHE)
 #if !(defined(FSL_SDK_ENABLE_DRIVER_CACHE_CONTROL) && FSL_SDK_ENABLE_DRIVER_CACHE_CONTROL)
         if (host->enableCacheControl == (uint32_t)kSDMMCHOST_CacheControlRWBuffer)
@@ -194,6 +212,20 @@ status_t SDMMCHOST_TransferFunction(sdmmchost_t *host, sdmmchost_transfer_t *con
         /* host error recovery */
         SDMMCHOST_ErrorRecovery(host->hostController.base);
     }
+#if defined(__aarch64__)
+    else
+    {
+        if ((content->data != NULL) && (content->data->rxData != NULL))
+        {
+            uintptr_t dmaBuf = (uintptr_t)content->data->rxData;
+            size_t dmaSize   = (size_t)content->data->blockSize * (size_t)content->data->blockCount;
+            if (dmaSize != 0U)
+            {
+                dcache_invalidate_range(dmaBuf, dmaSize);
+            }
+        }
+    }
+#endif
 #if ((defined __DCACHE_PRESENT) && __DCACHE_PRESENT) || (defined FSL_FEATURE_HAS_L1CACHE && FSL_FEATURE_HAS_L1CACHE)
 #if !(defined(FSL_SDK_ENABLE_DRIVER_CACHE_CONTROL) && FSL_SDK_ENABLE_DRIVER_CACHE_CONTROL)
     else
@@ -359,8 +391,13 @@ status_t SDMMCHOST_Init(sdmmchost_t *host)
     usdhcHost->config.writeWatermarkLevel = 0x80U;
     USDHC_Init(usdhcHost->base, &(usdhcHost->config));
 #if !(defined(FSL_FEATURE_USDHC_HAS_NO_VOLTAGE_SELECT) && (FSL_FEATURE_USDHC_HAS_NO_VOLTAGE_SELECT))
-    UART_PRINTF("Enable 1.8V signal voltage\r\n");
+    SDMMC_LOG("Enable 1.8V signal voltage\r\n");
     UDSHC_SelectVoltage(usdhcHost->base, true);
+#endif
+#if ((defined __DCACHE_PRESENT) && __DCACHE_PRESENT) || (defined FSL_FEATURE_HAS_L1CACHE && FSL_FEATURE_HAS_L1CACHE)
+    SDMMC_LOG("SDMMCHOST_Init: enableCacheControl=%u\r\n", (uint32_t)host->enableCacheControl);
+#else
+    SDMMC_LOG("SDMMCHOST_Init: enableCacheControl=N/A (no D-cache)\r\n");
 #endif
 
     return kStatus_Success;
@@ -688,3 +725,4 @@ status_t SDMMCHOST_ReadBootData(sdmmchost_t *host, sdmmchost_boot_config_t *host
 
     return kStatus_Success;
 }
+

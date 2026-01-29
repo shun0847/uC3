@@ -39,7 +39,7 @@ uint32_t BOARD_USDHC3ClockConfiguration(void)
     uint32_t freq;
 
     freq = CLOCK_GetClockRootFreq(kCLOCK_Usdhc3ClkRoot);
-    UART_PRINTF("USDHC3 clock freq: %d\r\n", freq);
+    SDMMC_LOG("USDHC3 clock freq: %d\r\n", freq);
     return freq;
 }
 
@@ -70,6 +70,8 @@ void BOARD_MMC_Config(void *card, uint32_t hostIRQPriority)
 
     ((mmc_card_t *)card)->hostVoltageWindowVCC  = BOARD_SDMMC_MMC_VCC_SUPPLY;
     ((mmc_card_t *)card)->hostVoltageWindowVCCQ = BOARD_SDMMC_MMC_VCCQ_SUPPLY;
+    /* Start from HighSpeed timing to avoid HS200 tuning failures during init. */
+    ((mmc_card_t *)card)->busTiming = kMMC_HighSpeedTiming;
 
 #if defined(__GIC_PRIO_BITS)
         GIC_SetPriority(BOARD_SDMMC_MMC_HOST_IRQ, hostIRQPriority);
