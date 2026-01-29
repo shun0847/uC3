@@ -14,6 +14,7 @@
 #include "diskio.h"
 #include "sdmmc_config.h"
 #include "sample_fatfs_cfg.h"
+#include "fsl_common_arm.h"
 #include "fsl_os_abstraction.h"
 
 /*******************************************************************************
@@ -47,6 +48,7 @@ static void cli_redraw_line(const char *prompt, const char *buf, UINT len);
 static FATFS g_fileSystem; /* File system object */
 static FIL g_fileObject;   /* File object */
 extern mmc_card_t g_mmc;
+volatile uint32_t g_usdhc3_irq_count = 0U;
 static char g_cli_cwd[CLI_PATH_MAX] = "/";
 /* @brief decription about the read/write buffer
  * The size of the read/write buffer in this driver example is multiple of 512, since DDR mode support 512-byte
@@ -610,6 +612,7 @@ int fatfs_task(VP_INT exinf)
     //BOARD_InitHardware();
     BOARD_MMC_Config(&g_mmc, BOARD_SDMMC_MMC_HOST_IRQ_PRIORITY);
 
+    __enable_irq();
     PRINTF("\r\nFATFS example to demonstrate how to use FATFS with MMC card.\r\n");
 
     /* Mount volume work area based on card. */

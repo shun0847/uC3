@@ -9,6 +9,7 @@
 #include <string.h>
 #include "fsl_mmc.h"
 #include "fsl_common.h"
+#include "sample_fatfs_cfg.h"
 #if defined(__aarch64__)
 #include "cache_armv8a.h"
 #endif
@@ -1070,14 +1071,14 @@ static status_t MMC_SendExtendedCsd(mmc_card_t *card, uint8_t *targetAddr, uint3
 #endif
         SDMMCHOST_ConvertDataToLittleEndian(card->host, alignBuffer, MMC_EXTENDED_CSD_BYTES / 4U,
                                             kSDMMC_DataPacketFormatLSBFirst);
-        if (targetAddr != NULL)
-        {
-            *targetAddr = ((uint8_t *)alignBuffer)[byteIndex];
-        }
-        else
-        {
-            MMC_DecodeExtendedCsd(card, alignBuffer);
-        }
+          if (targetAddr != NULL)
+          {
+              *targetAddr = ((uint8_t *)alignBuffer)[byteIndex];
+          }
+          else
+          {
+              MMC_DecodeExtendedCsd(card, alignBuffer);
+          }
 
         return kStatus_Success;
     }
@@ -1762,6 +1763,12 @@ static status_t MMC_SelectBusTiming(mmc_card_t *card)
 
         if (card->busTiming == kMMC_HighSpeedTiming)
         {
+            if ((card->flags & ((uint32_t)kMMC_SupportHighSpeed26MHZFlag | (uint32_t)kMMC_SupportHighSpeed52MHZFlag)) ==
+                0U)
+            {
+                card->busTiming = kMMC_HighSpeedTimingNone;
+                break;
+            }
             if (kStatus_Success != MMC_SwitchToHighSpeed(card))
             {
                 return kStatus_SDMMC_SwitchBusTimingFailed;
@@ -1884,6 +1891,7 @@ static status_t MMC_CheckBlockRange(mmc_card_t *card, uint32_t startBlock, uint3
             error = kStatus_InvalidArgument;
             break;
     }
+
     /* Check if the block range accessed is within current partition's block boundary. */
     if ((error == kStatus_Success) && ((startBlock + blockCount) > partitionBlocks))
     {

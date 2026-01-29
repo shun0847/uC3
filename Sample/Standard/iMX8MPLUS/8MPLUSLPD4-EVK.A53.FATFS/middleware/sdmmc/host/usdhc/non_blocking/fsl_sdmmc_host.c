@@ -511,9 +511,15 @@ status_t SDMMCHOST_TransferFunction(sdmmchost_t *host, sdmmchost_transfer_t *con
     if (error == kStatus_Success)
     {
         /* wait command event */
-        if ((kStatus_Fail == SDMMC_OSAEventWait(&(host->hostEvent), SDMMCHOST_TRANSFER_CMD_EVENT,
-                                                SDMMCHOST_TRANSFER_COMPLETE_TIMEOUT, &event)) ||
-            ((event & SDMMC_OSA_EVENT_TRANSFER_CMD_FAIL) != 0U))
+        while (true)
+        {
+            if (kStatus_Success == SDMMC_OSAEventWait(&(host->hostEvent), SDMMCHOST_TRANSFER_CMD_EVENT, 1000U, &event))
+            {
+                break;
+            }
+        }
+
+        if ((event & SDMMC_OSA_EVENT_TRANSFER_CMD_FAIL) != 0U)
         {
             error = kStatus_Fail;
         }
@@ -523,10 +529,15 @@ status_t SDMMCHOST_TransferFunction(sdmmchost_t *host, sdmmchost_transfer_t *con
             {
                 if ((event & SDMMC_OSA_EVENT_TRANSFER_DATA_SUCCESS) == 0U)
                 {
-                    if (((event & SDMMC_OSA_EVENT_TRANSFER_DATA_FAIL) != 0U) ||
-                        (kStatus_Fail == SDMMC_OSAEventWait(&(host->hostEvent), SDMMCHOST_TRANSFER_DATA_EVENT,
-                                                            SDMMCHOST_TRANSFER_COMPLETE_TIMEOUT, &event) ||
-                         ((event & SDMMC_OSA_EVENT_TRANSFER_DATA_FAIL) != 0U)))
+                    while (true)
+                    {
+                        if (kStatus_Success == SDMMC_OSAEventWait(&(host->hostEvent), SDMMCHOST_TRANSFER_DATA_EVENT,
+                                                                 1000U, &event))
+                        {
+                            break;
+                        }
+                    }
+                    if ((event & SDMMC_OSA_EVENT_TRANSFER_DATA_FAIL) != 0U)
                     {
                         error = kStatus_Fail;
                     }
@@ -820,6 +831,10 @@ status_t SDMMCHOST_Init(sdmmchost_t *host)
     /* Create handle for SDHC driver */
     usdhcCallback.TransferComplete = SDMMCHOST_TransferCompleteCallback;
     USDHC_TransferCreateHandle(usdhcHost->base, &host->handle, &usdhcCallback, host);
+
+    /* Enable interrupt status/signal for non-blocking transfers */
+    USDHC_EnableInterruptStatus(usdhcHost->base, kUSDHC_AllInterruptFlags);
+    USDHC_EnableInterruptSignal(usdhcHost->base, kUSDHC_AllInterruptFlags);
 
     /* Create transfer event. */
     if (kStatus_Success != SDMMC_OSAEventCreate(&(host->hostEvent)))
