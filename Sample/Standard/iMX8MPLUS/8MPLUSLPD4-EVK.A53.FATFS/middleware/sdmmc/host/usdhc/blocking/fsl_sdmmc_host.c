@@ -391,13 +391,10 @@ status_t SDMMCHOST_Init(sdmmchost_t *host)
     usdhcHost->config.writeWatermarkLevel = 0x80U;
     USDHC_Init(usdhcHost->base, &(usdhcHost->config));
 #if !(defined(FSL_FEATURE_USDHC_HAS_NO_VOLTAGE_SELECT) && (FSL_FEATURE_USDHC_HAS_NO_VOLTAGE_SELECT))
-    SDMMC_LOG("Enable 1.8V signal voltage\r\n");
     UDSHC_SelectVoltage(usdhcHost->base, true);
 #endif
 #if ((defined __DCACHE_PRESENT) && __DCACHE_PRESENT) || (defined FSL_FEATURE_HAS_L1CACHE && FSL_FEATURE_HAS_L1CACHE)
-    SDMMC_LOG("SDMMCHOST_Init: enableCacheControl=%u\r\n", (uint32_t)host->enableCacheControl);
 #else
-    SDMMC_LOG("SDMMCHOST_Init: enableCacheControl=N/A (no D-cache)\r\n");
 #endif
 
     return kStatus_Success;

@@ -19,8 +19,6 @@
 
 /* Private function prototypes -----------------------------------------------*/
 
-static void uart_send_task(VP_INT exinf);
-static void uart_recv_task(VP_INT exinf);
 /* Private typedef -----------------------------------------------------------*/
 
 /* User input message */
@@ -35,83 +33,6 @@ typedef struct t_msgblk {
 static ID g_mpfID;
 static ID g_mbxID;
 ID g_sndTaskID;
-
-/*
- * UART send task
- */
-static void uart_send_task(VP_INT exinf)
-{
-    UINT txcnt;
-    T_MSGBLK *blk = 0;
-    INT i = 0;
-    VB chr;
-    ER ercd;
-
-    const T_COM_SMOD  uart_ini = {
-        CFG_BAUDRATE,
-        CFG_BLEN,
-        CFG_PAR,
-        CFG_SBIT,
-        CFG_FLW
-    };
-
-    VB banner_str[]
-        = "\n\r\teForce Operating System Sample Program\r\n";
-
-    (void)ini_com(ID_UART, &uart_ini);
-    (void)ctr_com(ID_UART, STA_COM, 0);
-
-    (void)ctr_com(ID_UART, SND_BRK, 100);
-    txcnt = strlen(banner_str);
-    UART_PRINTF("%s", banner_str);
-    //(void)puts_com(ID_UART, banner_str, &txcnt, TMO_FEVR);
-
-    do {
-        ercd = getc_com(ID_UART, &chr, 0, 10);
-        if (ercd == E_OK) {
-            (void)putc_com(ID_UART, chr, TMO_FEVR);
-            if (chr == (VB)'\r') {
-                (void)putc_com(ID_UART, (VB)'\n', TMO_FEVR);
-            }
-        }
-        else
-        {
-            (void)dly_tsk(999U);
-            chr = (VB)(i + '0');
-            (void)putc_com(ID_UART, chr, TMO_FEVR);
-            if (++i >= 10) {
-                i = 0;
-            }
-        }
-    } while (ercd != E_OK);
-
-    (void)snd_mbx(g_mbxID, (T_MSG *)blk);
-    (void)tslp_tsk(1);
-    for(;;) {
-        rcv_mbx(g_mbxID, (T_MSG **)&blk);
-        (void)puts_com(ID_UART, blk->buf, &blk->cnt, TMO_FEVR);
-        (void)rel_mpf(g_mpfID, (VP)blk);
-        (void)ctr_com(ID_UART, CLN_TXBUF, 100);
-    }
-}
-
-/*
- * UART receive task
- */
-static void uart_recv_task(VP_INT exinf)
-{
-    T_MSGBLK *blk = 0;
-
-    rcv_mbx(g_mbxID, (T_MSG **)&blk);
-    for(;;) {
-        get_mpf(g_mpfID, (VP *)&blk);
-        blk->cnt = sizeof(blk->buf) - 1U;   /* parasoft-suppress BD-PB-NP "2017/09/01 Reviewed" */
-        (void)gets_com(ID_UART, blk->buf, 0, '\r', &blk->cnt, TMO_FEVR);
-        blk->buf[blk->cnt] = '\n';
-        blk->cnt++;
-        (void)snd_mbx(g_mbxID, (T_MSG *)blk);
-    }
-}
 
 /*
  * Start the UART sample.
@@ -148,30 +69,6 @@ void sample_uart_start(void)
     (void)ctr_com(ID_UART, STA_COM, 0);
 
     (void)ctr_com(ID_UART, SND_BRK, 100);
-    
-#if 0
-
-    const T_CTSK ctsk_snd = {
-        TA_HLNG | TA_ACT | TA_FPU,
-        (VP_INT)0,
-        (FP)uart_send_task,
-        4,
-        0x800,
-        0,
-        "uart_send_task"};
-
-    const T_CTSK ctsk_rcv = {
-        TA_HLNG | TA_ACT | TA_FPU,
-        (VP_INT)0,
-        (FP)uart_recv_task,
-        5,
-        0x800,
-        0,
-        "uart_recv_task"};
-
-    (void)acre_tsk((T_CTSK *)&ctsk_snd);
-    (void)acre_tsk((T_CTSK *)&ctsk_rcv);
-#endif
 }
 
 void UART_PRINTF(const char *fmt, ...)
