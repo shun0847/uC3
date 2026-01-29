@@ -823,6 +823,12 @@ status_t SDMMCHOST_Init(sdmmchost_t *host)
     usdhcHost->config.readWatermarkLevel  = 0x80U;
     usdhcHost->config.writeWatermarkLevel = 0x80U;
     USDHC_Init(usdhcHost->base, &(usdhcHost->config));
+    (void)USDHC_Reset(usdhcHost->base, kUSDHC_ResetAll, 100U);
+    /* Ensure clean state when bootloader left USDHC configured. */
+    usdhcHost->base->MIX_CTRL      = 0U;
+    usdhcHost->base->DS_ADDR       = 0U;
+    usdhcHost->base->ADMA_SYS_ADDR = 0U;
+    usdhcHost->base->PROT_CTRL &= ~USDHC_PROT_CTRL_DMASEL_MASK;
 #if !(defined(FSL_FEATURE_USDHC_HAS_NO_VOLTAGE_SELECT) && (FSL_FEATURE_USDHC_HAS_NO_VOLTAGE_SELECT))
     /* Default to 3.3V for eMMC on EVK */
     UDSHC_SelectVoltage(usdhcHost->base, false);

@@ -36,7 +36,6 @@ static void uart_init(void);
 static void clock_init(void);
 static void timer_init(void);
 static void usdhc3_init(void);
-void usdhc3_dump_iomux(void);
 
 /*
  * Setup IOMUX pins and enable clock for UART
@@ -197,11 +196,6 @@ static void usdhc3_init(void)
 #endif
     _kernel_synch_cache();
 
-}
-
-void usdhc3_dump_iomux(void)
-{
-    /* Intentionally left empty to reduce register dump logs. */
 }
 
 /*

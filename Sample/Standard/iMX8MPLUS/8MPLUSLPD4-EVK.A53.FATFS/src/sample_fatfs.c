@@ -607,8 +607,6 @@ int fatfs_task(VP_INT exinf)
     BYTE work[FF_MAX_SS];
     FRESULT result;
 
-    usdhc3_dump_iomux();
-
     //BOARD_InitHardware();
     BOARD_MMC_Config(&g_mmc, BOARD_SDMMC_MMC_HOST_IRQ_PRIORITY);
 
