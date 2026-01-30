@@ -42,6 +42,7 @@ static const char *cli_cwd_get(void);
 static void cli_build_path(char *out, size_t out_size, const char *path);
 static void cli_normalize_path(char *path);
 static void cli_redraw_line(const char *prompt, const char *buf, UINT len);
+static void osa_selftest(void);
 /*******************************************************************************
  * Variables
  ******************************************************************************/
@@ -79,6 +80,7 @@ static void cli_print_help(void)
     PRINTF("  echo <text> > <path>  - write text to file (overwrite)\r\n");
     PRINTF("  echo <text> >> <path> - append text to file\r\n");
     PRINTF("  rm <path>             - delete file or empty directory\r\n");
+    PRINTF("  selftest              - run OSA self-test\r\n");
     PRINTF("  exit                  - stop CLI loop\r\n\r\n");
 }
 
@@ -583,6 +585,10 @@ static void cli_prompt_loop(void)
         {
             cli_rm(arg1);
         }
+        else if (strcmp(cmd, "selftest") == 0)
+        {
+            osa_selftest();
+        }
         else if (strcmp(cmd, "exit") == 0)
         {
             break;
@@ -596,6 +602,72 @@ static void cli_prompt_loop(void)
 #endif /* MMC_ENABLED */
 
 #if defined(MMC_ENABLED)
+static void osa_selftest(void)
+{
+    osa_status_t st;
+    osa_event_flags_t flags = 0U;
+
+    PRINTF("\r\n[OSA self-test] start\r\n");
+
+    /* Semaphore test */
+    OSA_SEMAPHORE_HANDLE_DEFINE(semHandle);
+    st = OSA_SemaphoreCreateBinary(semHandle);
+    if (st != KOSA_StatusSuccess)
+    {
+        PRINTF("sem create: NG (%u)\r\n", (unsigned)st);
+    }
+    else
+    {
+        st = OSA_SemaphoreWait(semHandle, 10U);
+        PRINTF("sem wait timeout: %s\r\n", (st == KOSA_StatusTimeout) ? "OK" : "NG");
+        st = OSA_SemaphorePost(semHandle);
+        PRINTF("sem post: %s\r\n", (st == KOSA_StatusSuccess) ? "OK" : "NG");
+        st = OSA_SemaphoreWait(semHandle, 10U);
+        PRINTF("sem wait success: %s\r\n", (st == KOSA_StatusSuccess) ? "OK" : "NG");
+        (void)OSA_SemaphoreDestroy(semHandle);
+    }
+
+    /* Mutex test */
+    OSA_MUTEX_HANDLE_DEFINE(mutexHandle);
+    st = OSA_MutexCreate(mutexHandle);
+    if (st != KOSA_StatusSuccess)
+    {
+        PRINTF("mutex create: NG (%u)\r\n", (unsigned)st);
+    }
+    else
+    {
+        OSA_MutexLock(mutexHandle, 10U);
+        PRINTF("mutex lock: %s\r\n", (st == KOSA_StatusSuccess) ? "OK" : "NG");
+        st = OSA_MutexUnlock(mutexHandle);
+        PRINTF("mutex unlock: %s\r\n", (st == KOSA_StatusSuccess) ? "OK" : "NG");
+        (void)OSA_MutexDestroy(mutexHandle);
+    }
+
+    /* Event test */
+    OSA_EVENT_HANDLE_DEFINE(eventHandle);
+    st = OSA_EventCreate(eventHandle, 1U);
+    if (st != KOSA_StatusSuccess)
+    {
+        PRINTF("event create: NG (%u)\r\n", (unsigned)st);
+    }
+    else
+    {
+        st = OSA_EventWait(eventHandle, 0x1U, 1U, 10U, &flags);
+        PRINTF("event wait timeout: %s\r\n", (st == KOSA_StatusTimeout) ? "OK" : "NG");
+        st = OSA_EventSet(eventHandle, 0x1U);
+        PRINTF("event set: %s\r\n", (st == KOSA_StatusSuccess) ? "OK" : "NG");
+        st = OSA_EventWait(eventHandle, 0x1U, 1U, 10U, &flags);
+        PRINTF("event wait success: %s\r\n", (st == KOSA_StatusSuccess) ? "OK" : "NG");
+        (void)OSA_EventDestroy(eventHandle);
+    }
+
+    /* Time delay test */
+    OSA_TimeDelay(1U);
+    PRINTF("delay: done\r\n");
+
+    PRINTF("[OSA self-test] done\r\n\r\n");
+}
+
 int fatfs_task(VP_INT exinf)
 {
     FRESULT error;
@@ -649,6 +721,8 @@ int fatfs_task(VP_INT exinf)
         return -1;
     }
 #endif
+
+    osa_selftest();
 
     cli_prompt_loop();
 

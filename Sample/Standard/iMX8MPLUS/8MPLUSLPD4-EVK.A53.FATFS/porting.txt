@@ -44,7 +44,7 @@ hw_init.c: uSDHC3の初期化追加
 sdmmc_config: 必要初期化及び変更
 - 
 ffconf.h:
-- FF_FS_REENTRANT 1 (mutex不要)
+- FF_FS_REENTRANT 0 (mutex不要)
 - FF_USE_MKFS 0	(f_mkfs())
 lscript.ld: NonCacheableセクションを配置 
 
