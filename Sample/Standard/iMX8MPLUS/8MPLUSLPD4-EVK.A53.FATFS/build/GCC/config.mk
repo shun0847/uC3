@@ -71,7 +71,15 @@ C_FILES		+= 	$(wildcard $(ARCHTOP)/CMSIS/Core_AArch64/Source/*.c) \
 				$(wildcard $(NXPMWTOP)/sdmmc/osa/*.c) \
 				$(wildcard $(NXPMWTOP)/sdmmc/mmc/*.c) 
 
+# OSA implementation switch: bm | uitron
+OSA_IMPL ?= uitron
+ifeq ($(OSA_IMPL),uitron)
+C_FILES		+=	$(NXPCOMPTOP)/osa/fsl_os_abstraction_uitron.c
+DEFINES     += -DFSL_OSA_UITRON -DOSA_USED
+else
 C_FILES		+=	$(NXPCOMPTOP)/osa/fsl_os_abstraction_bm.c
+endif
+
 # SDMMC host mode switch: blocking | non_blocking
 SDMMC_HOST_MODE ?= non_blocking
 ifeq ($(SDMMC_HOST_MODE),non_blocking)

@@ -2,12 +2,12 @@
  * Copyright (c) 2013-2014, Freescale Semiconductor, Inc.
  * Copyright 2016-2017 NXP
  *
- * ile
+ * File
  *
  * SPDX-License-Identifier: BSD-3-Clause
  ********************************************************************************** */
-#if !defined(__FSL_OS_ABSTRACTION_FREERTOS_H__)
-#define __FSL_OS_ABSTRACTION_FREERTOS_H__
+#if !defined(__FSL_OS_ABSTRACTION_UITRON_H__)
+#define __FSL_OS_ABSTRACTION_UITRON_H__
 
 #if defined(__IAR_SYSTEMS_ICC__)
 /**
@@ -59,13 +59,11 @@
 #endif
 
 MISRAC_DISABLE
-#include "FreeRTOS.h"
-#include "semphr.h"
-#include "event_groups.h"
+#include "kernel.h"
 MISRAC_ENABLE
 
 /*!
- * @addtogroup os_abstraction_free_rtos
+ * @addtogroup os_abstraction_uitron
  * @{
  */
 
@@ -73,16 +71,16 @@ MISRAC_ENABLE
  * Declarations
  ******************************************************************************/
 /*! @brief Type for a task handler, returned by the OSA_TaskCreate function. */
-typedef TaskHandle_t task_handler_t;
+typedef ID task_handler_t;
 
 /*! @brief Type for a task stack.*/
-typedef portSTACK_TYPE task_stack_t;
+typedef uint32_t task_stack_t;
 
 /*! @brief Type for task parameter */
 typedef void *task_param_t;
 
 /*! @brief Type for an event flags object.*/
-typedef EventBits_t event_flags_t;
+typedef FLGPTN event_flags_t;
 
 /*! @brief Constant to pass as timeout value in order to wait indefinitely. */
 #define OSA_WAIT_FOREVER 0xFFFFFFFFU
@@ -103,11 +101,8 @@ extern void DefaultISR(void);
 /*!
  * @brief To provide unified task piority for upper layer, OSA layer makes conversion.
  */
-#define PRIORITY_OSA_TO_RTOS(osa_prio) \
-    (((UBaseType_t)configMAX_PRIORITIES - 1U) * (OSA_TASK_PRIORITY_MIN - osa_prio) / OSA_TASK_PRIORITY_MIN)
-#define PRIORITY_RTOS_TO_OSA(rtos_prio)                                               \
-    (OSA_TASK_PRIORITY_MIN * (((UBaseType_t)configMAX_PRIORITIES - 1U) - rtos_prio) / \
-     ((UBaseType_t)configMAX_PRIORITIES - 1U))
+#define PRIORITY_OSA_TO_RTOS(osa_prio) (osa_prio)
+#define PRIORITY_RTOS_TO_OSA(rtos_prio) (rtos_prio)
 
 /*! @} */
 
@@ -131,4 +126,4 @@ extern void DefaultISR(void);
 /*! @}*/
 /*! @}*/
 
-#endif /* __FSL_OS_ABSTRACTION_FREERTOS_H__ */
+#endif /* __FSL_OS_ABSTRACTION_UITRON_H__ */

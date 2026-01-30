@@ -52,7 +52,7 @@ lscript.ld: NonCacheableセクションを配置
 eMMCのバスモード、チューニング問題
 HighSpeed(52MHz)動作  HS200(200MHz)は動作せず
 →転送速度が遅い
-
+NonBlocking
 
 ボード依存ファイル参考
 https://github.com/nxp-mcuxpresso/mcuxsdk-examples/tree/main/_boards/evkmimx8mp
