@@ -42,7 +42,9 @@ static const char *cli_cwd_get(void);
 static void cli_build_path(char *out, size_t out_size, const char *path);
 static void cli_normalize_path(char *path);
 static void cli_redraw_line(const char *prompt, const char *buf, UINT len);
-static void osa_selftest(void);
+static void selftest(void);
+static void mtx_test(void);
+static void mtx_test_task(VP_INT exinf);
 /*******************************************************************************
  * Variables
  ******************************************************************************/
@@ -51,6 +53,9 @@ static FIL g_fileObject;   /* File object */
 extern mmc_card_t g_mmc;
 volatile uint32_t g_usdhc3_irq_count = 0U;
 static char g_cli_cwd[CLI_PATH_MAX] = "/";
+static const char g_mtx_test_path[] = "/mtx_test.log";
+static bool g_mtx_test_event_ready = false;
+static OSA_EVENT_HANDLE_DEFINE(g_mtx_test_event);
 /* @brief decription about the read/write buffer
  * The size of the read/write buffer in this driver example is multiple of 512, since DDR mode support 512-byte
  * block size only and our middleware switch the timing mode automatically per device capability. You can define the
@@ -80,7 +85,8 @@ static void cli_print_help(void)
     PRINTF("  echo <text> > <path>  - write text to file (overwrite)\r\n");
     PRINTF("  echo <text> >> <path> - append text to file\r\n");
     PRINTF("  rm <path>             - delete file or empty directory\r\n");
-    PRINTF("  selftest              - run OSA self-test\r\n");
+    PRINTF("  selftest              - run OSA/FATFS quick test\r\n");
+    PRINTF("  mtx_test              - run FATFS multi-task mutex test\r\n");
     PRINTF("  exit                  - stop CLI loop\r\n\r\n");
 }
 
@@ -587,7 +593,11 @@ static void cli_prompt_loop(void)
         }
         else if (strcmp(cmd, "selftest") == 0)
         {
-            osa_selftest();
+            selftest();
+        }
+        else if (strcmp(cmd, "mtx_test") == 0)
+        {
+            mtx_test();
         }
         else if (strcmp(cmd, "exit") == 0)
         {
@@ -602,12 +612,19 @@ static void cli_prompt_loop(void)
 #endif /* MMC_ENABLED */
 
 #if defined(MMC_ENABLED)
-static void osa_selftest(void)
+static void selftest(void)
 {
     osa_status_t st;
     osa_event_flags_t flags = 0U;
+    FRESULT f_err;
+    FIL file;
+    UINT bytesWritten;
+    UINT bytesRead;
+    uint32_t irq_before = 0U;
+    uint32_t irq_after = 0U;
+    char fullpath[CLI_PATH_MAX];
 
-    PRINTF("\r\n[OSA self-test] start\r\n");
+    PRINTF("\r\n[Self-test] start\r\n");
 
     /* Semaphore test */
     OSA_SEMAPHORE_HANDLE_DEFINE(semHandle);
@@ -665,7 +682,140 @@ static void osa_selftest(void)
     OSA_TimeDelay(1U);
     PRINTF("delay: done\r\n");
 
-    PRINTF("[OSA self-test] done\r\n\r\n");
+    /* FATFS + DMA/IRQ quick test */
+    PRINTF("fatfs rw test: start\r\n");
+    cli_build_path(fullpath, sizeof(fullpath), "selftest.bin");
+    f_err = f_open(&file, fullpath, FA_CREATE_ALWAYS | FA_WRITE | FA_READ);
+    if (f_err)
+    {
+        PRINTF("fatfs rw test: open NG (err=%d)\r\n", f_err);
+        PRINTF("[Self-test] done\r\n\r\n");
+        return;
+    }
+
+    for (UINT size = 64U; size <= 512U; size *= 2U)
+    {
+        for (UINT i = 0U; i < size; i++)
+        {
+            g_bufferWrite[i] = (uint8_t)(i ^ size);
+            g_bufferRead[i] = 0U;
+        }
+        irq_before = g_usdhc3_irq_count;
+        f_err = f_lseek(&file, 0U);
+        if (!f_err)
+        {
+            f_err = f_write(&file, g_bufferWrite, size, &bytesWritten);
+        }
+        if (!f_err)
+        {
+            f_err = f_sync(&file);
+        }
+        if (!f_err)
+        {
+            f_err = f_lseek(&file, 0U);
+        }
+        if (!f_err)
+        {
+            f_err = f_read(&file, g_bufferRead, size, &bytesRead);
+        }
+        irq_after = g_usdhc3_irq_count;
+
+        if (f_err || (bytesWritten != size) || (bytesRead != size) ||
+            (memcmp(g_bufferWrite, g_bufferRead, size) != 0))
+        {
+            PRINTF("fatfs rw test: size=%u NG (err=%d wr=%u rd=%u)\r\n",
+                   (unsigned)size, f_err, (unsigned)bytesWritten, (unsigned)bytesRead);
+            break;
+        }
+        PRINTF("fatfs rw test: size=%u OK (irq +%u)\r\n",
+               (unsigned)size, (unsigned)(irq_after - irq_before));
+    }
+    (void)f_close(&file);
+    PRINTF("fatfs rw test: done\r\n");
+
+    PRINTF("[Self-test] done\r\n\r\n");
+}
+
+static void mtx_test_task(VP_INT exinf)
+{
+    const uint32_t id = (uint32_t)exinf;
+    FIL file;
+    FRESULT f_err;
+    UINT bytesWritten;
+    char line[64];
+
+    f_err = f_open(&file, g_mtx_test_path, FA_OPEN_APPEND | FA_WRITE);
+    if (f_err == FR_OK)
+    {
+        for (uint32_t i = 0U; i < 100U; i++)
+        {
+            (void)snprintf(line, sizeof(line), "T%u:%03u\r\n", (unsigned)id, (unsigned)i);
+            f_err = f_write(&file, line, (UINT)strlen(line), &bytesWritten);
+            if ((f_err != FR_OK) || (bytesWritten != (UINT)strlen(line)))
+            {
+                break;
+            }
+            /* Yield to encourage interleaving. */
+            OSA_TimeDelay(1U);
+        }
+        (void)f_close(&file);
+    }
+
+    if (g_mtx_test_event_ready)
+    {
+        (void)OSA_EventSet(g_mtx_test_event, (id == 1U) ? 0x1U : 0x2U);
+    }
+}
+
+static void mtx_test(void)
+{
+    osa_status_t st;
+    osa_event_flags_t flags = 0U;
+    const T_CTSK tsk1 = {
+        TA_HLNG | TA_ACT | TA_FPU,
+        (VP_INT)1,
+        (FP)mtx_test_task,
+        6,
+        0x2000,
+        0,
+        "mtx_test_1"};
+    const T_CTSK tsk2 = {
+        TA_HLNG | TA_ACT | TA_FPU,
+        (VP_INT)2,
+        (FP)mtx_test_task,
+        6,
+        0x2000,
+        0,
+        "mtx_test_2"};
+
+    PRINTF("\r\n[Mutex test] start\r\n");
+
+    if (!g_mtx_test_event_ready)
+    {
+        st = OSA_EventCreate(g_mtx_test_event, 0U);
+        if (st != KOSA_StatusSuccess)
+        {
+            PRINTF("mtx_test: event create NG (%u)\r\n", (unsigned)st);
+            return;
+        }
+        g_mtx_test_event_ready = true;
+    }
+
+    (void)OSA_EventClear(g_mtx_test_event, 0x3U);
+    (void)f_unlink(g_mtx_test_path);
+
+    (void)acre_tsk((T_CTSK *)&tsk1);
+    (void)acre_tsk((T_CTSK *)&tsk2);
+
+    st = OSA_EventWait(g_mtx_test_event, 0x3U, 1U, osaWaitForever_c, &flags);
+    if (st == KOSA_StatusSuccess)
+    {
+        PRINTF("[Mutex test] done (file=%s)\r\n\r\n", g_mtx_test_path);
+    }
+    else
+    {
+        PRINTF("[Mutex test] timeout/NG (%u)\r\n\r\n", (unsigned)st);
+    }
 }
 
 int fatfs_task(VP_INT exinf)
@@ -722,7 +872,7 @@ int fatfs_task(VP_INT exinf)
     }
 #endif
 
-    osa_selftest();
+    selftest();
 
     cli_prompt_loop();
 

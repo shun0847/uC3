@@ -9,7 +9,6 @@
 #include <string.h>
 #include "fsl_mmc.h"
 #include "fsl_common.h"
-#include "sample_fatfs_cfg.h"
 #if defined(__aarch64__)
 #include "cache_armv8a.h"
 #endif

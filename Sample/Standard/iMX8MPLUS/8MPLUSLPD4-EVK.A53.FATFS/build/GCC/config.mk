@@ -129,6 +129,7 @@ endef
 DEFINES += -DCPU_MIMX8ML8DVNLZ_ca53
 DEFINES += -DMMC_ENABLED
 DEFINES += -D__STARTUP_INITIALIZE_NONCACHEDATA
+DEFINES += -D__DCACHE_PRESENT=1 -DFSL_FEATURE_HAS_L1CACHE=1
 
 # Compiler flags
 ASFLAGS			= -mcpu=${MCPU} -nostdinc -ffreestanding -Wa,--fatal-warnings \

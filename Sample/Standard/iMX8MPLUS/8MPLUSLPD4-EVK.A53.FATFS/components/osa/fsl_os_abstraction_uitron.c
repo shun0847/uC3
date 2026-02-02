@@ -162,6 +162,7 @@ osa_status_t OSA_MutexCreate(osa_mutex_handle_t mutexHandle)
     cmtx.ceilpri = 0U;
     cmtx.name = NULL;
     h->id = acre_mtx(&cmtx);
+
     return (h->id > 0) ? KOSA_StatusSuccess : KOSA_StatusError;
 }
 

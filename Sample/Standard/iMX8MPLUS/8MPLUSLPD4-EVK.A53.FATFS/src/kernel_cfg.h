@@ -35,7 +35,7 @@ extern "C" {
 #define CFG_KRN_FLGID_MAX       (8U)
 #define CFG_KRN_DTQID_MAX       (8U)
 #define CFG_KRN_MBXID_MAX       (8U)
-#define CFG_KRN_MTXID_MAX       (0U)
+#define CFG_KRN_MTXID_MAX       (4U)
 #define CFG_KRN_MBFID_MAX       (0U)
 #define CFG_KRN_PORID_MAX       (0U)
 #define CFG_KRN_MPFID_MAX       (8U)
