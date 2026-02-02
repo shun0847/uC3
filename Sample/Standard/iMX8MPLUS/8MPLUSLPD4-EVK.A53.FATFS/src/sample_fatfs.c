@@ -53,7 +53,7 @@ static FIL g_fileObject;   /* File object */
 extern mmc_card_t g_mmc;
 volatile uint32_t g_usdhc3_irq_count = 0U;
 static char g_cli_cwd[CLI_PATH_MAX] = "/";
-static const char g_mtx_test_path[] = "/mtx_test.log";
+static const char g_mtx_test_path[] = "0:/mtx_test.log";
 static bool g_mtx_test_event_ready = false;
 static OSA_EVENT_HANDLE_DEFINE(g_mtx_test_event);
 /* @brief decription about the read/write buffer
@@ -743,8 +743,17 @@ static void mtx_test_task(VP_INT exinf)
     FRESULT f_err;
     UINT bytesWritten;
     char line[64];
-
+    PRINTF("mtx_task%u: start\r\n", (unsigned)id);
+    f_err = f_chdrive("0:");
+    if (f_err != FR_OK)
+    {
+        PRINTF("mtx_task%u: f_chdrive NG err=%d\r\n", (unsigned)id, (int)f_err);
+    }
     f_err = f_open(&file, g_mtx_test_path, FA_OPEN_APPEND | FA_WRITE);
+    if (f_err != FR_OK)
+    {
+        PRINTF("mtx_task%u: f_open NG (%s) err=%d\r\n", (unsigned)id, g_mtx_test_path, (int)f_err);
+    }
     if (f_err == FR_OK)
     {
         for (uint32_t i = 0U; i < 100U; i++)
@@ -753,38 +762,44 @@ static void mtx_test_task(VP_INT exinf)
             f_err = f_write(&file, line, (UINT)strlen(line), &bytesWritten);
             if ((f_err != FR_OK) || (bytesWritten != (UINT)strlen(line)))
             {
+                PRINTF("mtx_task%u: f_write NG err=%d wr=%u\r\n",
+                       (unsigned)id, (int)f_err, (unsigned)bytesWritten);
                 break;
             }
             /* Yield to encourage interleaving. */
             OSA_TimeDelay(1U);
         }
         (void)f_close(&file);
+        PRINTF("mtx_task%u: done\r\n", (unsigned)id);
     }
 
     if (g_mtx_test_event_ready)
     {
         (void)OSA_EventSet(g_mtx_test_event, (id == 1U) ? 0x1U : 0x2U);
     }
+
 }
 
 static void mtx_test(void)
 {
     osa_status_t st;
     osa_event_flags_t flags = 0U;
+    ER_ID tskid1;
+    ER_ID tskid2;
     const T_CTSK tsk1 = {
         TA_HLNG | TA_ACT | TA_FPU,
         (VP_INT)1,
         (FP)mtx_test_task,
-        6,
-        0x2000,
+        5,
+        0x1000,
         0,
         "mtx_test_1"};
     const T_CTSK tsk2 = {
         TA_HLNG | TA_ACT | TA_FPU,
         (VP_INT)2,
         (FP)mtx_test_task,
-        6,
-        0x2000,
+        5,
+        0x1000,
         0,
         "mtx_test_2"};
 
@@ -800,21 +815,23 @@ static void mtx_test(void)
         }
         g_mtx_test_event_ready = true;
     }
-
     (void)OSA_EventClear(g_mtx_test_event, 0x3U);
     (void)f_unlink(g_mtx_test_path);
 
-    (void)acre_tsk((T_CTSK *)&tsk1);
-    (void)acre_tsk((T_CTSK *)&tsk2);
+    tskid1 = acre_tsk((T_CTSK *)&tsk1);
+    tskid2 = acre_tsk((T_CTSK *)&tsk2);
+    /* Yield to let tasks run. */
+    OSA_TimeDelay(1U);
 
-    st = OSA_EventWait(g_mtx_test_event, 0x3U, 1U, osaWaitForever_c, &flags);
+    st = OSA_EventWait(g_mtx_test_event, 0x3U, 1U, 10000U, &flags);
     if (st == KOSA_StatusSuccess)
     {
         PRINTF("[Mutex test] done (file=%s)\r\n\r\n", g_mtx_test_path);
     }
     else
     {
-        PRINTF("[Mutex test] timeout/NG (%u)\r\n\r\n", (unsigned)st);
+        PRINTF("[Mutex test] timeout/NG (%u, flags=0x%02x)\r\n\r\n",
+               (unsigned)st, (unsigned)flags);
     }
 }
 
@@ -871,9 +888,6 @@ int fatfs_task(VP_INT exinf)
         return -1;
     }
 #endif
-
-    selftest();
-
     cli_prompt_loop();
 
     while (true)

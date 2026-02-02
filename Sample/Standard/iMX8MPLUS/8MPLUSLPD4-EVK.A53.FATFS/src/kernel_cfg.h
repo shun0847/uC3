@@ -21,9 +21,9 @@ extern "C" {
 #define CFG_KRN_TICK            (1U)
 
 /* System memory size (byte) */
-#define CFG_KRN_SYSMEM_SZ       (0x003000U)
+#define CFG_KRN_SYSMEM_SZ       (0x006000U)
 /* Stack memory size (byte) */
-#define CFG_KRN_STKMEM_SZ       (0x003000U)
+#define CFG_KRN_STKMEM_SZ       (0x006000U)
 /* Memory pool size (byte) */
 #define CFG_KRN_MPLMEM_SZ       (0x002000U)
 /* MMU translation space size (byte) */
