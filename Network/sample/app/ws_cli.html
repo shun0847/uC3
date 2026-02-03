@@ -1,0 +1,113 @@
+<!--
+本HTMLファイルはブラウザ上で動作させることでWebSocketクライアントが
+動作します。説明・送信・受信の動作確認が出来ます。
+弊社WebSocketサーバサンプルの動作確認用に利用出来ます。
+
+<説明>
+  1. "Enter WebSocket URL"テキスト欄にWebSocketサーバのURLを指定します。
+    例) "ws://192.168.11.51", "wss://192.168.11.51"
+  
+  2. [Connect]を押下すると対象サーバへの接続を行います。
+    成功例) "Connected to ws://192.168.11.51" メッセージが表示
+    失敗例) "WebSocket error: [{エラー要因}]" メッセージが表示
+  
+  3. "Enter send message"テキスト欄に送信したいメッセージを記入し、
+    [Send]を押下すると接続サーバへメッセージを送信します。
+    
+  4. 接続サーバからメッセージを受信すると "Recv: {受信メッセージ}" が表示されます。
+  
+    ※説明ではサーバIPアドレスを 192.168.11.51 としています。
+
+<動作確認>
+- Google Chrome v126.0.6478.127
+-->
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <title>WebSocket Example</title>
+</head>
+<body>
+    <h1>WebSocket Example</h1>
+    <input type="text" id="tURL" placeholder="Enter WebSocket URL">
+    <button onclick="con_ws()">Connect</button>
+    <button onclick="cls_ws()">Disconnect</button>
+    <br>
+    <input type="text" id="tMsg" placeholder="Enter send message">
+    <button onclick="snd_ws()">Send</button>
+    <div id="messages"></div>
+    
+    <script>
+        let ws;
+        
+        function con_ws() {
+            const urlInput = document.getElementById('tURL');
+            const url = document.getElementById('tURL').value;
+            const messageDiv = document.getElementById('messages');
+            ws = new WebSocket(url);
+            
+            ws.onopen = () => {
+                console.log('WebSocket connection opened');
+                const newMessage = document.createElement('div');
+                newMessage.textContent = 'Connected to ' + url;
+                messageDiv.appendChild(newMessage);
+            };
+            
+            ws.onmessage = (event) => {
+                const newMessage = document.createElement('div');
+                newMessage.textContent = ' Recv: ' + event.data;
+                messageDiv.appendChild(newMessage);
+            };
+            
+            ws.onclose = () => {
+                console.log('WebSocket connection closed');
+                const newMessage = document.createElement('div');
+                newMessage.textContent = 'Connection closed';
+                messageDiv.appendChild(newMessage);
+            };
+            
+            ws.onerror = (error) => {
+                console.error('WebSocket error:', error);
+                const newMessage = document.createElement('div');
+                newMessage.textContent = 'WebSocket error: ' + error;
+                messageDiv.appendChild(newMessage);
+            };
+        }
+        
+        function cls_ws() {
+            const messageDiv = document.getElementById('messages');
+            if (ws) {
+                ws.close();
+                console.log('WebSocket connection closed by user');
+                const newMessage = document.createElement('div');
+                newMessage.textContent = 'Disconnected by user';
+                messageDiv.appendChild(newMessage);
+            } else {
+                console.error('WebSocket is not connected');
+                const newMessage = document.createElement('div');
+                newMessage.textContent = 'WebSocket is not connected';
+                messageDiv.appendChild(newMessage);
+            }
+        }
+        
+        function snd_ws() {
+            const messageInput = document.getElementById('tMsg');
+            const message = messageInput.value;
+            const messageDiv = document.getElementById('messages');
+            
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(message);
+                
+                const newMessage = document.createElement('div');
+                newMessage.textContent = ' Send: ' + message;
+                messageDiv.appendChild(newMessage);
+                messageInput.value = '';
+            } else {
+                const newMessage = document.createElement('div');
+                newMessage.textContent = 'WebSocket is not connected';
+                messageDiv.appendChild(newMessage);
+            }
+        }
+    </script>
+</body>
+</html>

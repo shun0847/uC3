@@ -1,0 +1,18 @@
+# VS Code
+.vscode/
+
+# Document
+Document
+Document/
+
+# installer
+installer
+installer/
+
+#build files
+*.o
+*.axf
+*.bin
+*.elf
+*.map
+build/GCC/*.ld
