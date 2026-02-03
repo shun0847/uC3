@@ -1,0 +1,12 @@
+diff --git a/uio_driver.h.org b/uio_driver.h
+index e7a101e..a3dcf3f 100644
+--- a/include/linux/uio_driver.h
++++ b/include/linux/uio_driver.h
+@@ -44,6 +44,7 @@ struct uio_mem {
+ 	bool			readonly;
+ 	void __iomem		*internal_addr;
+ 	struct uio_map		*map;
++	int			cache_attr;
+ };
+ 
+ #define MAX_UIO_MAPS	5
