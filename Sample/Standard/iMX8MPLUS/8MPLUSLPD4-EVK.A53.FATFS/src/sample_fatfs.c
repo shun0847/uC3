@@ -77,14 +77,14 @@ static void cli_print_help(void)
 {
     PRINTF("\r\nCommands:\r\n");
     PRINTF("  help                  - show this help\r\n");
-    PRINTF("  ls [path]             - list directory (default /)\r\n");
-    PRINTF("  cd <path>             - change directory\r\n");
-    PRINTF("  mkdir <path>          - create directory\r\n");
-    PRINTF("  touch <path>          - create empty file\r\n");
-    PRINTF("  cat <path>            - print file contents\r\n");
-    PRINTF("  echo <text> > <path>  - write text to file (overwrite)\r\n");
-    PRINTF("  echo <text> >> <path> - append text to file\r\n");
-    PRINTF("  rm <path>             - delete file or empty directory\r\n");
+    PRINTF("  ls [path]             - list directory (default .)\r\n");
+    PRINTF("  cd [path]             - change directory\r\n");
+    PRINTF("  mkdir [dir]           - create directory\r\n");
+    PRINTF("  touch [file]          - create empty file\r\n");
+    PRINTF("  cat [file]            - print file contents\r\n");
+    PRINTF("  echo <text> > [path]  - write text to file (overwrite)\r\n");
+    PRINTF("  echo <text> >> [path] - append text to file\r\n");
+    PRINTF("  rm [path]             - delete file or empty directory\r\n");
     PRINTF("  selftest              - run OSA/FATFS quick test\r\n");
     PRINTF("  mtx_test              - run FATFS multi-task mutex test\r\n");
     PRINTF("  exit                  - stop CLI loop\r\n\r\n");
