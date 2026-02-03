@@ -4,7 +4,6 @@
 
 #include "ff.h"
 
-
 #if FF_USE_LFN == 3	/* Use dynamic memory allocation */
 
 /*------------------------------------------------------------------------*/
@@ -49,7 +48,7 @@ static HANDLE Mutex[FF_VOLUMES + 1];	/* Table of mutex handle */
 #elif OS_TYPE == 1	/* uITRON */
 #include "itron.h"
 #include "kernel.h"
-static mtxid Mutex[FF_VOLUMES + 1];		/* Table of mutex ID */
+static ID Mutex[FF_VOLUMES + 1];		/* Table of mutex ID */
 
 #elif OS_TYPE == 2	/* uc/OS-II */
 #include "includes.h"
@@ -88,6 +87,7 @@ int ff_mutex_create (	/* Returns 1:Function succeeded or 0:Could not create the 
 	T_CMTX cmtx = {TA_TPRI,1};
 
 	Mutex[vol] = acre_mtx(&cmtx);
+
 	return (int)(Mutex[vol] > 0);
 
 #elif OS_TYPE == 2	/* uC/OS-II */
@@ -157,7 +157,11 @@ int ff_mutex_take (	/* Returns 1:Succeeded or 0:Timeout */
 	return (int)(WaitForSingleObject(Mutex[vol], FF_FS_TIMEOUT) == WAIT_OBJECT_0);
 
 #elif OS_TYPE == 1	/* uITRON */
-	return (int)(tloc_mtx(Mutex[vol], FF_FS_TIMEOUT) == E_OK);
+	{
+		ER ercd = tloc_mtx(Mutex[vol], FF_FS_TIMEOUT);
+
+		return (int)(ercd == E_OK);
+	}
 
 #elif OS_TYPE == 2	/* uC/OS-II */
 	OS_ERR err;
@@ -190,8 +194,8 @@ void ff_mutex_give (
 	ReleaseMutex(Mutex[vol]);
 
 #elif OS_TYPE == 1	/* uITRON */
-	unl_mtx(Mutex[vol]);
-
+	ER ercd = unl_mtx(Mutex[vol]);
+	
 #elif OS_TYPE == 2	/* uC/OS-II */
 	OSMutexPost(Mutex[vol]);
 

@@ -44,7 +44,7 @@ hw_init.c: uSDHC3の初期化追加
 sdmmc_config: 必要初期化及び変更
 - 
 ffconf.h:
-- FF_FS_REENTRANT 1 (mutex不要)
+- FF_FS_REENTRANT 0 (mutex不要)
 - FF_USE_MKFS 0	(f_mkfs())
 lscript.ld: NonCacheableセクションを配置 
 
@@ -52,7 +52,7 @@ lscript.ld: NonCacheableセクションを配置
 eMMCのバスモード、チューニング問題
 HighSpeed(52MHz)動作  HS200(200MHz)は動作せず
 →転送速度が遅い
-
+NonBlocking
 
 ボード依存ファイル参考
 https://github.com/nxp-mcuxpresso/mcuxsdk-examples/tree/main/_boards/evkmimx8mp

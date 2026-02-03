@@ -848,6 +848,13 @@ status_t SDMMCHOST_Init(sdmmchost_t *host)
         error = kStatus_Fail;
     }
 
+#if ((defined __DCACHE_PRESENT) && __DCACHE_PRESENT) || (defined FSL_FEATURE_HAS_L1CACHE && FSL_FEATURE_HAS_L1CACHE)
+#if !(defined(FSL_SDK_ENABLE_DRIVER_CACHE_CONTROL) && FSL_SDK_ENABLE_DRIVER_CACHE_CONTROL)
+    /* Force host driver cache maintenance for DMA buffers. */
+    host->enableCacheControl = kSDMMCHOST_CacheControlRWBuffer;
+#endif
+#endif
+
     (void)SDMMC_OSAMutexUnlock(&host->lock);
 
     return error;

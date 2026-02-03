@@ -62,7 +62,6 @@ C_FILES		=	$(wildcard $(SRCTOP)/*.c) \
 
 C_FILES		+= 	$(wildcard $(ARCHTOP)/CMSIS/Core_AArch64/Source/*.c) \
 				$(wildcard $(NXPCOMPTOP)/lists/*.c) \
-				$(wildcard $(NXPCOMPTOP)/osa/*.c)  \
 				$(wildcard $(NXPDRVTOP)/common/*.c) \
 				$(wildcard $(NXPDRVTOP)/device/*.c) \
 				$(wildcard $(NXPDRVTOP)/usdhc/*.c) \
@@ -71,6 +70,15 @@ C_FILES		+= 	$(wildcard $(ARCHTOP)/CMSIS/Core_AArch64/Source/*.c) \
 				$(wildcard $(NXPMWTOP)/sdmmc/common/*.c) \
 				$(wildcard $(NXPMWTOP)/sdmmc/osa/*.c) \
 				$(wildcard $(NXPMWTOP)/sdmmc/mmc/*.c) 
+
+# OSA implementation switch: bm | uitron
+OSA_IMPL ?= uitron
+ifeq ($(OSA_IMPL),uitron)
+C_FILES		+=	$(NXPCOMPTOP)/osa/fsl_os_abstraction_uitron.c
+DEFINES     += -DFSL_OSA_UITRON -DOSA_USED
+else
+C_FILES		+=	$(NXPCOMPTOP)/osa/fsl_os_abstraction_bm.c
+endif
 
 # SDMMC host mode switch: blocking | non_blocking
 SDMMC_HOST_MODE ?= non_blocking
@@ -121,6 +129,7 @@ endef
 DEFINES += -DCPU_MIMX8ML8DVNLZ_ca53
 DEFINES += -DMMC_ENABLED
 DEFINES += -D__STARTUP_INITIALIZE_NONCACHEDATA
+DEFINES += -D__DCACHE_PRESENT=1 -DFSL_FEATURE_HAS_L1CACHE=1
 
 # Compiler flags
 ASFLAGS			= -mcpu=${MCPU} -nostdinc -ffreestanding -Wa,--fatal-warnings \

@@ -42,6 +42,9 @@ static const char *cli_cwd_get(void);
 static void cli_build_path(char *out, size_t out_size, const char *path);
 static void cli_normalize_path(char *path);
 static void cli_redraw_line(const char *prompt, const char *buf, UINT len);
+static void selftest(void);
+static void mtx_test(void);
+static void mtx_test_task(VP_INT exinf);
 /*******************************************************************************
  * Variables
  ******************************************************************************/
@@ -50,6 +53,9 @@ static FIL g_fileObject;   /* File object */
 extern mmc_card_t g_mmc;
 volatile uint32_t g_usdhc3_irq_count = 0U;
 static char g_cli_cwd[CLI_PATH_MAX] = "/";
+static const char g_mtx_test_path[] = "0:/mtx_test.log";
+static bool g_mtx_test_event_ready = false;
+static OSA_EVENT_HANDLE_DEFINE(g_mtx_test_event);
 /* @brief decription about the read/write buffer
  * The size of the read/write buffer in this driver example is multiple of 512, since DDR mode support 512-byte
  * block size only and our middleware switch the timing mode automatically per device capability. You can define the
@@ -71,14 +77,16 @@ static void cli_print_help(void)
 {
     PRINTF("\r\nCommands:\r\n");
     PRINTF("  help                  - show this help\r\n");
-    PRINTF("  ls [path]             - list directory (default /)\r\n");
-    PRINTF("  cd <path>             - change directory\r\n");
-    PRINTF("  mkdir <path>          - create directory\r\n");
-    PRINTF("  touch <path>          - create empty file\r\n");
-    PRINTF("  cat <path>            - print file contents\r\n");
-    PRINTF("  echo <text> > <path>  - write text to file (overwrite)\r\n");
-    PRINTF("  echo <text> >> <path> - append text to file\r\n");
-    PRINTF("  rm <path>             - delete file or empty directory\r\n");
+    PRINTF("  ls [path]             - list directory (default .)\r\n");
+    PRINTF("  cd [path]             - change directory\r\n");
+    PRINTF("  mkdir [dir]           - create directory\r\n");
+    PRINTF("  touch [file]          - create empty file\r\n");
+    PRINTF("  cat [file]            - print file contents\r\n");
+    PRINTF("  echo <text> > [path]  - write text to file (overwrite)\r\n");
+    PRINTF("  echo <text> >> [path] - append text to file\r\n");
+    PRINTF("  rm [path]             - delete file or empty directory\r\n");
+    PRINTF("  selftest              - run OSA/FATFS quick test\r\n");
+    PRINTF("  mtx_test              - run FATFS multi-task mutex test\r\n");
     PRINTF("  exit                  - stop CLI loop\r\n\r\n");
 }
 
@@ -583,6 +591,14 @@ static void cli_prompt_loop(void)
         {
             cli_rm(arg1);
         }
+        else if (strcmp(cmd, "selftest") == 0)
+        {
+            selftest();
+        }
+        else if (strcmp(cmd, "mtx_test") == 0)
+        {
+            mtx_test();
+        }
         else if (strcmp(cmd, "exit") == 0)
         {
             break;
@@ -596,6 +612,229 @@ static void cli_prompt_loop(void)
 #endif /* MMC_ENABLED */
 
 #if defined(MMC_ENABLED)
+static void selftest(void)
+{
+    osa_status_t st;
+    osa_event_flags_t flags = 0U;
+    FRESULT f_err;
+    FIL file;
+    UINT bytesWritten;
+    UINT bytesRead;
+    uint32_t irq_before = 0U;
+    uint32_t irq_after = 0U;
+    char fullpath[CLI_PATH_MAX];
+
+    PRINTF("\r\n[Self-test] start\r\n");
+
+    /* Semaphore test */
+    OSA_SEMAPHORE_HANDLE_DEFINE(semHandle);
+    st = OSA_SemaphoreCreateBinary(semHandle);
+    if (st != KOSA_StatusSuccess)
+    {
+        PRINTF("sem create: NG (%u)\r\n", (unsigned)st);
+    }
+    else
+    {
+        st = OSA_SemaphoreWait(semHandle, 10U);
+        PRINTF("sem wait timeout: %s\r\n", (st == KOSA_StatusTimeout) ? "OK" : "NG");
+        st = OSA_SemaphorePost(semHandle);
+        PRINTF("sem post: %s\r\n", (st == KOSA_StatusSuccess) ? "OK" : "NG");
+        st = OSA_SemaphoreWait(semHandle, 10U);
+        PRINTF("sem wait success: %s\r\n", (st == KOSA_StatusSuccess) ? "OK" : "NG");
+        (void)OSA_SemaphoreDestroy(semHandle);
+    }
+
+    /* Mutex test */
+    OSA_MUTEX_HANDLE_DEFINE(mutexHandle);
+    st = OSA_MutexCreate(mutexHandle);
+    if (st != KOSA_StatusSuccess)
+    {
+        PRINTF("mutex create: NG (%u)\r\n", (unsigned)st);
+    }
+    else
+    {
+        OSA_MutexLock(mutexHandle, 10U);
+        PRINTF("mutex lock: %s\r\n", (st == KOSA_StatusSuccess) ? "OK" : "NG");
+        st = OSA_MutexUnlock(mutexHandle);
+        PRINTF("mutex unlock: %s\r\n", (st == KOSA_StatusSuccess) ? "OK" : "NG");
+        (void)OSA_MutexDestroy(mutexHandle);
+    }
+
+    /* Event test */
+    OSA_EVENT_HANDLE_DEFINE(eventHandle);
+    st = OSA_EventCreate(eventHandle, 1U);
+    if (st != KOSA_StatusSuccess)
+    {
+        PRINTF("event create: NG (%u)\r\n", (unsigned)st);
+    }
+    else
+    {
+        st = OSA_EventWait(eventHandle, 0x1U, 1U, 10U, &flags);
+        PRINTF("event wait timeout: %s\r\n", (st == KOSA_StatusTimeout) ? "OK" : "NG");
+        st = OSA_EventSet(eventHandle, 0x1U);
+        PRINTF("event set: %s\r\n", (st == KOSA_StatusSuccess) ? "OK" : "NG");
+        st = OSA_EventWait(eventHandle, 0x1U, 1U, 10U, &flags);
+        PRINTF("event wait success: %s\r\n", (st == KOSA_StatusSuccess) ? "OK" : "NG");
+        (void)OSA_EventDestroy(eventHandle);
+    }
+
+    /* Time delay test */
+    OSA_TimeDelay(1U);
+    PRINTF("delay: done\r\n");
+
+    /* FATFS + DMA/IRQ quick test */
+    PRINTF("fatfs rw test: start\r\n");
+    cli_build_path(fullpath, sizeof(fullpath), "selftest.bin");
+    f_err = f_open(&file, fullpath, FA_CREATE_ALWAYS | FA_WRITE | FA_READ);
+    if (f_err)
+    {
+        PRINTF("fatfs rw test: open NG (err=%d)\r\n", f_err);
+        PRINTF("[Self-test] done\r\n\r\n");
+        return;
+    }
+
+    for (UINT size = 64U; size <= 512U; size *= 2U)
+    {
+        for (UINT i = 0U; i < size; i++)
+        {
+            g_bufferWrite[i] = (uint8_t)(i ^ size);
+            g_bufferRead[i] = 0U;
+        }
+        irq_before = g_usdhc3_irq_count;
+        f_err = f_lseek(&file, 0U);
+        if (!f_err)
+        {
+            f_err = f_write(&file, g_bufferWrite, size, &bytesWritten);
+        }
+        if (!f_err)
+        {
+            f_err = f_sync(&file);
+        }
+        if (!f_err)
+        {
+            f_err = f_lseek(&file, 0U);
+        }
+        if (!f_err)
+        {
+            f_err = f_read(&file, g_bufferRead, size, &bytesRead);
+        }
+        irq_after = g_usdhc3_irq_count;
+
+        if (f_err || (bytesWritten != size) || (bytesRead != size) ||
+            (memcmp(g_bufferWrite, g_bufferRead, size) != 0))
+        {
+            PRINTF("fatfs rw test: size=%u NG (err=%d wr=%u rd=%u)\r\n",
+                   (unsigned)size, f_err, (unsigned)bytesWritten, (unsigned)bytesRead);
+            break;
+        }
+        PRINTF("fatfs rw test: size=%u OK (irq +%u)\r\n",
+               (unsigned)size, (unsigned)(irq_after - irq_before));
+    }
+    (void)f_close(&file);
+    PRINTF("fatfs rw test: done\r\n");
+
+    PRINTF("[Self-test] done\r\n\r\n");
+}
+
+static void mtx_test_task(VP_INT exinf)
+{
+    const uint32_t id = (uint32_t)exinf;
+    FIL file;
+    FRESULT f_err;
+    UINT bytesWritten;
+    char line[64];
+    PRINTF("mtx_task%u: start\r\n", (unsigned)id);
+    f_err = f_chdrive("0:");
+    if (f_err != FR_OK)
+    {
+        PRINTF("mtx_task%u: f_chdrive NG err=%d\r\n", (unsigned)id, (int)f_err);
+    }
+    f_err = f_open(&file, g_mtx_test_path, FA_OPEN_APPEND | FA_WRITE);
+    if (f_err != FR_OK)
+    {
+        PRINTF("mtx_task%u: f_open NG (%s) err=%d\r\n", (unsigned)id, g_mtx_test_path, (int)f_err);
+    }
+    if (f_err == FR_OK)
+    {
+        for (uint32_t i = 0U; i < 100U; i++)
+        {
+            (void)snprintf(line, sizeof(line), "T%u:%03u\r\n", (unsigned)id, (unsigned)i);
+            f_err = f_write(&file, line, (UINT)strlen(line), &bytesWritten);
+            if ((f_err != FR_OK) || (bytesWritten != (UINT)strlen(line)))
+            {
+                PRINTF("mtx_task%u: f_write NG err=%d wr=%u\r\n",
+                       (unsigned)id, (int)f_err, (unsigned)bytesWritten);
+                break;
+            }
+            /* Yield to encourage interleaving. */
+            OSA_TimeDelay(1U);
+        }
+        (void)f_close(&file);
+        PRINTF("mtx_task%u: done\r\n", (unsigned)id);
+    }
+
+    if (g_mtx_test_event_ready)
+    {
+        (void)OSA_EventSet(g_mtx_test_event, (id == 1U) ? 0x1U : 0x2U);
+    }
+
+}
+
+static void mtx_test(void)
+{
+    osa_status_t st;
+    osa_event_flags_t flags = 0U;
+    ER_ID tskid1;
+    ER_ID tskid2;
+    const T_CTSK tsk1 = {
+        TA_HLNG | TA_ACT | TA_FPU,
+        (VP_INT)1,
+        (FP)mtx_test_task,
+        5,
+        0x1000,
+        0,
+        "mtx_test_1"};
+    const T_CTSK tsk2 = {
+        TA_HLNG | TA_ACT | TA_FPU,
+        (VP_INT)2,
+        (FP)mtx_test_task,
+        5,
+        0x1000,
+        0,
+        "mtx_test_2"};
+
+    PRINTF("\r\n[Mutex test] start\r\n");
+
+    if (!g_mtx_test_event_ready)
+    {
+        st = OSA_EventCreate(g_mtx_test_event, 0U);
+        if (st != KOSA_StatusSuccess)
+        {
+            PRINTF("mtx_test: event create NG (%u)\r\n", (unsigned)st);
+            return;
+        }
+        g_mtx_test_event_ready = true;
+    }
+    (void)OSA_EventClear(g_mtx_test_event, 0x3U);
+    (void)f_unlink(g_mtx_test_path);
+
+    tskid1 = acre_tsk((T_CTSK *)&tsk1);
+    tskid2 = acre_tsk((T_CTSK *)&tsk2);
+    /* Yield to let tasks run. */
+    OSA_TimeDelay(1U);
+
+    st = OSA_EventWait(g_mtx_test_event, 0x3U, 1U, 10000U, &flags);
+    if (st == KOSA_StatusSuccess)
+    {
+        PRINTF("[Mutex test] done (file=%s)\r\n\r\n", g_mtx_test_path);
+    }
+    else
+    {
+        PRINTF("[Mutex test] timeout/NG (%u, flags=0x%02x)\r\n\r\n",
+               (unsigned)st, (unsigned)flags);
+    }
+}
+
 int fatfs_task(VP_INT exinf)
 {
     FRESULT error;
@@ -649,7 +888,6 @@ int fatfs_task(VP_INT exinf)
         return -1;
     }
 #endif
-
     cli_prompt_loop();
 
     while (true)

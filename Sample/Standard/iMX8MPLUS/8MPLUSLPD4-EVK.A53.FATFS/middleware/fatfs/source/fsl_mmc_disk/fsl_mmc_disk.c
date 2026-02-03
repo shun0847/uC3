@@ -18,7 +18,12 @@
 #include "fsl_mmc.h"
 #include "fsl_mmc_disk.h"
 #include "diskio.h"
-#include "sample_fatfs_cfg.h"
+#if ((defined __DCACHE_PRESENT) && __DCACHE_PRESENT) || (defined FSL_FEATURE_HAS_L1CACHE && FSL_FEATURE_HAS_L1CACHE)
+#if !(defined(FSL_SDK_ENABLE_DRIVER_CACHE_CONTROL) && FSL_SDK_ENABLE_DRIVER_CACHE_CONTROL)
+#include "fsl_cache.h"
+#endif
+#endif
+
 /*******************************************************************************
  * Definitons
  ******************************************************************************/
@@ -53,6 +58,13 @@ DRESULT mmc_disk_write(BYTE pdrv, const BYTE* buff, LBA_t sector, UINT count)
 
     LBA_t phys = UC3_PART_START_LBA + sector;
 
+#if ((defined __DCACHE_PRESENT) && __DCACHE_PRESENT) || (defined FSL_FEATURE_HAS_L1CACHE && FSL_FEATURE_HAS_L1CACHE)
+#if !(defined(FSL_SDK_ENABLE_DRIVER_CACHE_CONTROL) && FSL_SDK_ENABLE_DRIVER_CACHE_CONTROL)
+    /* Ensure DMA sees latest data. */
+    DCACHE_CleanByRange((uint32_t)buff, (uint32_t)count * 512U);
+#endif
+#endif
+
     if (kStatus_Success != MMC_WriteBlocks(&g_mmc, buff, phys, count))
     {
         return RES_ERROR;
@@ -77,6 +89,14 @@ DRESULT mmc_disk_read(BYTE pdrv, BYTE* buff, LBA_t sector, UINT count)
     {
         return RES_ERROR;
     }
+
+#if ((defined __DCACHE_PRESENT) && __DCACHE_PRESENT) || (defined FSL_FEATURE_HAS_L1CACHE && FSL_FEATURE_HAS_L1CACHE)
+#if !(defined(FSL_SDK_ENABLE_DRIVER_CACHE_CONTROL) && FSL_SDK_ENABLE_DRIVER_CACHE_CONTROL)
+    /* Ensure CPU sees DMA data. */
+    DCACHE_InvalidateByRange((uint32_t)buff, (uint32_t)count * 512U);
+#endif
+#endif
+
     return RES_OK;
 }
 
