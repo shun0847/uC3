@@ -15,4 +15,4 @@ installer/
 *.bin
 *.elf
 *.map
-*.ld
+build/GCC/*.ld
