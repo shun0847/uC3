@@ -13,14 +13,12 @@ OPT = -O0
 DBG_ON = yes
 
 # Directory definition
-#PRJTOP ?= $(shell pwd)
-
-###Omitting arguments###
+# Changed from CUI-dependent $(shell pwd)
 PRJTOP ?= $(CURDIR)
 SRCTOP = $(PRJTOP)/../../src
 DRVTOP = $(PRJTOP)/../../../../../../Driver/Standard
 KERTOP = $(PRJTOP)/../../../../../../Kernel/Standard
-
+# Additional directory paths
 ARCHTOP    = $(PRJTOP)/../../CMSIS/Core_AArch64
 NXPCOMPTOP = $(PRJTOP)/../../components
 NXPDRVTOP  = $(PRJTOP)/../../drivers
@@ -59,7 +57,7 @@ C_FILES		=	$(wildcard $(SRCTOP)/*.c) \
 				$(wildcard $(DRVTOP)/src/DDR_iMX_UART.c) \
 				$(wildcard $(DRVTOP)/src/GCC/DDR_AArch64_GICv3_sub.c) \
 				$(wildcard $(DRVTOP)/src/GCC/DDR_AArch64_GTIMER_sub.c)
-
+# Additional source files
 C_FILES		+= 	$(wildcard $(ARCHTOP)/CMSIS/Core_AArch64/Source/*.c) \
 				$(wildcard $(NXPCOMPTOP)/lists/*.c) \
 				$(wildcard $(NXPDRVTOP)/common/*.c) \
@@ -106,7 +104,7 @@ INCLUDES	= -I$(KERTOP)/inc
 INCLUDES	+= -I$(KERTOP)/inc/AArch64
 INCLUDES	+= -I$(DRVTOP)/inc
 INCLUDES	+= -I$(SRCTOP)
-
+# Additional include paths
 INCLUDES     += -I$(ARCHTOP)/Include
 INCLUDES	 += -I$(NXPCOMPTOP)/lists
 INCLUDES	 += -I$(NXPCOMPTOP)/osa
@@ -126,6 +124,7 @@ INCLUDES     += -I$(NXPMWTOP)/sdmmc/mmc
 define add_define
 DEFINES	+= -D$(1)$(if $(value $(1)),=$(value $(1)),)
 endef
+# Additional compiler macros
 DEFINES += -DCPU_MIMX8ML8DVNLZ_ca53
 DEFINES += -DMMC_ENABLED
 DEFINES += -D__STARTUP_INITIALIZE_NONCACHEDATA
@@ -143,16 +142,7 @@ CPPFLAGS		= $(CONFIG_FLAG) $(DEFINES) $(INCLUDES) -nostartfiles -L$(KERTOP) $(CF
 CPPFLAGS		+= -Wall -nostdlib
 
 # Compiler command related definition
-#CC			= $(CROSS_COMPILE)gcc
-#AS			= $(CROSS_COMPILE)gcc
-#LD			= $(CROSS_COMPILE)ld
-#NM			= $(CROSS_COMPILE)nm
-#OBJCOPY		= $(CROSS_COMPILE)objcopy
-#OBJDUMP		= $(CROSS_COMPILE)objdump
-#STRIP		= $(CROSS_COMPILE)strip
-#AR			= $(CROSS_COMPILE)ar
-
-###Omitting arguments###
+# CROSS_COMPILE should be defined for using GNU toolchain
 CC			= aarch64-none-elf-gcc
 AS			= aarch64-none-elf-gcc
 LD			= aarch64-none-elf-ld
