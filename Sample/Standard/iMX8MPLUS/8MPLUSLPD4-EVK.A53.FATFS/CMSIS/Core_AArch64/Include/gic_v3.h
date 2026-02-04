@@ -277,13 +277,9 @@ __STATIC_INLINE void GIC_WaitRWP(enum gic_rwp rwp)
 {
   uint32_t rwp_mask;
   uint32_t __IM *base;
-  GICRedistributor_Type *GIC_R;
 
   if (rwp == GICR_RWP) {
-    GIC_R = GIC_GetRdist();
-    if (!GIC_R)
-      return;
-    base = &GIC_R->CTLR;
+    base = &GIC_GetRdist()->CTLR;
     if (!base)
       return;
     rwp_mask = BIT(GICR_CTLR_RWP);
@@ -673,12 +669,6 @@ __STATIC_INLINE void GIC_DistInit(void)
   uint32_t priority_field;
   uint32_t ppi_priority;
 
-  /* As multiple OS runs different CPU Cores which share single GIC, so distributor
-     can only be configured by the first started OS, bypass distrubutor configuration
-     in case of it has alread been configured */
-  if (GICDistributor->CTLR & (1U << GICD_CTLR_ENGRP1A | 1U << GICD_CTLR_ENGRP1))
-	return;
-
   //A reset sets all bits in the IGROUPRs corresponding to the SPIs to 0,
   //configuring all of the interrupts as Secure.
 
@@ -942,9 +932,11 @@ __STATIC_INLINE void GIC_CPUInterfaceInit(void)
 
 /** \brief Initialize and enable the GIC
 */
-__STATIC_INLINE void GIC_Enable(void)
+__STATIC_INLINE void GIC_Enable(int init_dist)
 {
-  GIC_DistInit();
+  /* Only one core should be responsible for the GIC distributor setup */
+  if (init_dist)
+    GIC_DistInit();
 
   GIC_RedistInit();
   GIC_CPUInterfaceInit(); //per CPU
