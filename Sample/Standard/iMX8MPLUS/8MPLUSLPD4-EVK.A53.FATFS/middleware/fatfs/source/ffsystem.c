@@ -161,7 +161,7 @@ int ff_mutex_take (	/* Returns 1:Succeeded or 0:Timeout */
 #elif OS_TYPE == 2	/* uC/OS-II */
 	OS_ERR err;
 
-	OSMutexPend(Mutex[vol], FF_FS_TIMEOUT, &err);
+	OSMutexPend(Mutex[vol], FF_FS_TIMEOUT, &err));
 	return (int)(err == OS_NO_ERR);
 
 #elif OS_TYPE == 3	/* FreeRTOS */
@@ -189,8 +189,8 @@ void ff_mutex_give (
 	ReleaseMutex(Mutex[vol]);
 
 #elif OS_TYPE == 1	/* uITRON */
-	ER ercd = unl_mtx(Mutex[vol]);
-	
+	unl_mtx(Mutex[vol]);
+
 #elif OS_TYPE == 2	/* uC/OS-II */
 	OSMutexPost(Mutex[vol]);
 

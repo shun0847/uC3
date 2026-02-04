@@ -68,23 +68,8 @@ C_FILES		+= 	$(wildcard $(ARCHTOP)/CMSIS/Core_AArch64/Source/*.c) \
 				$(wildcard $(NXPMWTOP)/sdmmc/common/*.c) \
 				$(wildcard $(NXPMWTOP)/sdmmc/osa/*.c) \
 				$(wildcard $(NXPMWTOP)/sdmmc/mmc/*.c) 
-
-# OSA implementation switch: bm | uitron
-OSA_IMPL ?= uitron
-ifeq ($(OSA_IMPL),uitron)
 C_FILES		+=	$(NXPCOMPTOP)/osa/fsl_os_abstraction_uitron.c
-DEFINES     += -DFSL_OSA_UITRON -DOSA_USED
-else
-C_FILES		+=	$(NXPCOMPTOP)/osa/fsl_os_abstraction_bm.c
-endif
-
-# SDMMC host mode switch: blocking | non_blocking
-SDMMC_HOST_MODE ?= non_blocking
-ifeq ($(SDMMC_HOST_MODE),non_blocking)
 C_FILES		+=	$(NXPMWTOP)/sdmmc/host/usdhc/non_blocking/fsl_sdmmc_host.c
-else
-C_FILES		+=	$(NXPMWTOP)/sdmmc/host/usdhc/blocking/fsl_sdmmc_host.c
-endif
 
 # Object file components
 OBJS	:= $(ASM_FILES:.S=.o) $(C_FILES:.c=.o)
@@ -129,6 +114,7 @@ DEFINES += -DCPU_MIMX8ML8DVNLZ_ca53
 DEFINES += -DMMC_ENABLED
 DEFINES += -D__STARTUP_INITIALIZE_NONCACHEDATA
 DEFINES += -D__DCACHE_PRESENT=1 -DFSL_FEATURE_HAS_L1CACHE=1
+DEFINES += -DFSL_OSA_UITRON -DOSA_USED
 
 # Compiler flags
 ASFLAGS			= -mcpu=${MCPU} -nostdinc -ffreestanding -Wa,--fatal-warnings \

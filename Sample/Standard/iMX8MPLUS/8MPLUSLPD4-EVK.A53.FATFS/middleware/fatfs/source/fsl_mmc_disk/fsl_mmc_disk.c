@@ -39,7 +39,7 @@
  ******************************************************************************/
 
 /*! @brief Card descriptor */
-AT_NONCACHEABLE_SECTION_ALIGN(mmc_card_t g_mmc, SDMMC_DATA_BUFFER_ALIGN_CACHE);
+mmc_card_t g_mmc;
 
 /*******************************************************************************
  * Code
@@ -114,9 +114,7 @@ DRESULT mmc_disk_ioctl(BYTE pdrv, BYTE cmd, void* buff)
         case GET_SECTOR_COUNT:
             if (buff)
             {
-                //*(uint32_t *)buff = g_mmc.userPartitionBlocks;
                 *(uint32_t *)buff = UC3_PART_SECTORS;
-
             }
             else
             {
@@ -185,6 +183,7 @@ DSTATUS mmc_disk_initialize(BYTE pdrv)
         memset(&g_mmc, 0U, sizeof(g_mmc));
         return STA_NOINIT;
     }
+    
     isCardInitialized = true;
 
     return RES_OK;
