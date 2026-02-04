@@ -23,9 +23,7 @@
 #include "kernel.h"
 #include "imx8mplus_uC3.h"
 #include "DDR_iMX_UART_cfg.h"
-#include "fsl_clock.h"
 #include "fsl_iomuxc.h"
-#include "sample_uart_cfg.h"
 
 /* Control DBGEN for the timer */
 #define TIMER_DBGEN         0x1     /* 0x0 for clear, 0x1 for set */
@@ -181,19 +179,10 @@ static void usdhc3_init(void)
 
     IOMUXC_SetPinMux(IOMUXC_NAND_CLE_USDHC3_DATA7, 0U);
     IOMUXC_SetPinConfig(IOMUXC_NAND_CLE_USDHC3_DATA7, usdhc_pad_data);
-#if 1
-    /* eMMC RESET_B */
-    IOMUXC_SetPinMux(IOMUXC_NAND_READY_B_USDHC3_RESET_B, 0U);
-    IOMUXC_SetPinConfig(IOMUXC_NAND_READY_B_USDHC3_RESET_B, usdhc_pad_data);
-#endif
-    /* HS200 strobe */
+
     IOMUXC_SetPinMux(IOMUXC_NAND_CE1_B_USDHC3_STROBE, 0U);
     IOMUXC_SetPinConfig(IOMUXC_NAND_CE1_B_USDHC3_STROBE, usdhc_pad_clk);
-#if 0
-    /* USDHC3 VSELECT */
-    IOMUXC_SetPinMux(IOMUXC_GPIO1_IO11_USDHC3_VSELECT, 0U);
-    IOMUXC_SetPinConfig(IOMUXC_GPIO1_IO11_USDHC3_VSELECT, usdhc_pad_data);
-#endif
+
     _kernel_synch_cache();
 
 }

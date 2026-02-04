@@ -6,16 +6,10 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include <stdio.h>
-#include <string.h>
-#include <ctype.h>
-#include "fsl_mmc.h"
 #include "ff.h"
 #include "diskio.h"
 #include "sdmmc_config.h"
 #include "sample_fatfs_cfg.h"
-#include "fsl_common_arm.h"
-#include "fsl_os_abstraction.h"
 
 /*******************************************************************************
  * Definitions
@@ -28,7 +22,6 @@
  * Prototypes
  ******************************************************************************/
 static int fatfs_task(VP_INT exinf);
-extern void usdhc3_dump_iomux(void);
 static void cli_print_help(void);
 static void cli_ls(const char *path);
 static void cli_touch(const char *path);
@@ -49,7 +42,6 @@ static void mtx_test_task(VP_INT exinf);
  * Variables
  ******************************************************************************/
 static FATFS g_fileSystem; /* File system object */
-static FIL g_fileObject;   /* File object */
 extern mmc_card_t g_mmc;
 volatile uint32_t g_usdhc3_irq_count = 0U;
 static char g_cli_cwd[CLI_PATH_MAX] = "/";
@@ -72,18 +64,17 @@ SDK_ALIGN(uint8_t g_bufferRead[BUFFER_SIZE], BOARD_SDMMC_DATA_BUFFER_ALIGN_SIZE)
 /*******************************************************************************
  * Code
  ******************************************************************************/
-#if defined(MMC_ENABLED)
 static void cli_print_help(void)
 {
     PRINTF("\r\nCommands:\r\n");
     PRINTF("  help                  - show this help\r\n");
     PRINTF("  ls [path]             - list directory (default .)\r\n");
     PRINTF("  cd [path]             - change directory\r\n");
-    PRINTF("  mkdir [dir]           - create directory\r\n");
-    PRINTF("  touch [file]          - create empty file\r\n");
-    PRINTF("  cat [file]            - print file contents\r\n");
-    PRINTF("  echo <text> > [path]  - write text to file (overwrite)\r\n");
-    PRINTF("  echo <text> >> [path] - append text to file\r\n");
+    PRINTF("  mkdir [path]           - create directory\r\n");
+    PRINTF("  touch [path]          - create empty file\r\n");
+    PRINTF("  cat [path]            - print file contents\r\n");
+    PRINTF("  echo \"text\" > [path]  - write text to file (overwrite)\r\n");
+    PRINTF("  echo \"text\" >> [path] - append text to file\r\n");
     PRINTF("  rm [path]             - delete file or empty directory\r\n");
     PRINTF("  selftest              - run OSA/FATFS quick test\r\n");
     PRINTF("  mtx_test              - run FATFS multi-task mutex test\r\n");
@@ -309,7 +300,7 @@ static void cli_write(const char *path, const char *text, bool append)
     char local[CLI_LINE_MAX];
     if (path == NULL || path[0] == '\0' || text == NULL)
     {
-        PRINTF("echo: usage echo <text> > <path>\r\n");
+        PRINTF("echo: usage echo \"text\" > [path]\r\n");
         return;
     }
     (void)snprintf(local, sizeof(local), "%s\r\n", text);
@@ -564,7 +555,7 @@ static void cli_prompt_loop(void)
             }
             if (op == NULL)
             {
-                PRINTF("echo: usage echo <text> > <path>\r\n");
+                PRINTF("echo: usage echo \"text\" > [path]\r\n");
                 continue;
             }
             *op = '\0';
@@ -582,7 +573,7 @@ static void cli_prompt_loop(void)
             *end = '\0';
             if ((text[0] == '\0') || (op[0] == '\0'))
             {
-                PRINTF("echo: usage echo <text> > <path>\r\n");
+                PRINTF("echo: usage echo \"text\" > [path]\r\n");
                 continue;
             }
             cli_write(op, text, append);
@@ -609,9 +600,7 @@ static void cli_prompt_loop(void)
         }
     }
 }
-#endif /* MMC_ENABLED */
 
-#if defined(MMC_ENABLED)
 static void selftest(void)
 {
     osa_status_t st;
@@ -894,7 +883,6 @@ int fatfs_task(VP_INT exinf)
     {
     }
 }
-#endif /* MMC_ENABLED */
 
 void sample_fatfs_start(void)
 {
