@@ -7,15 +7,12 @@
  */
 
 #include "fsl_usdhc.h"
-#include "fsl_sdmmc_host.h"
 #if defined(FSL_SDK_ENABLE_DRIVER_CACHE_CONTROL) && FSL_SDK_ENABLE_DRIVER_CACHE_CONTROL
 #include "fsl_cache.h"
 #endif /* FSL_SDK_ENABLE_DRIVER_CACHE_CONTROL */
 #if defined(FSL_FEATURE_MEMORY_HAS_ADDRESS_OFFSET) && FSL_FEATURE_MEMORY_HAS_ADDRESS_OFFSET
 #include "fsl_memory.h"
 #endif
-
-static bool s_cmd1ErrorLogged;
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
@@ -741,23 +738,6 @@ static status_t USDHC_WaitCommandDone(USDHC_Type *base, usdhc_command_t *command
         if (error == kStatus_Success)
         {
             error = USDHC_ReceiveCommandResponse(base, command);
-            if ((command->index == 1U) && (command->responseType == kCARD_ResponseTypeR3))
-            {
-                s_cmd1ErrorLogged = false;
-            }
-        }
-        else
-        {
-            if ((command->index == 1U) && (command->responseType == kCARD_ResponseTypeR3))
-            {
-                if (!s_cmd1ErrorLogged)
-                {
-                    s_cmd1ErrorLogged = true;
-                }
-            }
-            else
-            {
-            }
         }
 
         USDHC_ClearInterruptStatusFlags(base, kUSDHC_CommandFlag);
@@ -2485,9 +2465,6 @@ void USDHC_TransferHandleIRQ(USDHC_Type *base, usdhc_handle_t *handle)
     uint32_t interruptFlags;
 
     interruptFlags = USDHC_GetEnabledInterruptStatusFlags(base);
-    if (interruptFlags != 0U)
-    {
-    }
 
     if (IS_USDHC_FLAG_SET(interruptFlags, kUSDHC_CardDetectFlag))
     {
@@ -2545,4 +2522,3 @@ void USDHC2_DriverIRQHandler(void)
 }
 
 #endif
-

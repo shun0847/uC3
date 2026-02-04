@@ -18,8 +18,28 @@
 #include "ff.h"         /* Obtains integer types */
 #include "diskio.h"     /* Declarations of disk functions */
 
+#if defined(RAM_DISK_ENABLE) && (RAM_DISK_ENABLE == 1)
+#include "fsl_ram_disk.h"
+#endif
+
+#if defined(USB_DISK_ENABLE) && (USB_DISK_ENABLE == 1)
+#include "fsl_usb_disk.h"
+#endif
+
+#if defined(SD_DISK_ENABLE) && (SD_DISK_ENABLE == 1)
+#include "fsl_sd_disk.h"
+#endif
+
 #if defined(MMC_DISK_ENABLE) && (MMC_DISK_ENABLE == 1)
 #include "fsl_mmc_disk.h"
+#endif
+
+#if defined(SDSPI_DISK_ENABLE) && (SDSPI_DISK_ENABLE == 1)
+#include "fsl_sdspi_disk.h"
+#endif
+
+#if defined(NAND_DISK_ENABLE) && (NAND_DISK_ENABLE == 1)
+#include "fsl_nand_disk.h"
 #endif
 
 /*-----------------------------------------------------------------------*/
@@ -33,9 +53,34 @@ DSTATUS disk_status (
     DSTATUS stat;
     switch (pdrv)
     {
+#if defined(RAM_DISK_ENABLE) && (RAM_DISK_ENABLE == 1)
+        case RAMDISK:
+            stat = ram_disk_status(pdrv);
+            return stat;
+#endif
+#if defined(USB_DISK_ENABLE) && (USB_DISK_ENABLE == 1)
+        case USBDISK:
+            stat = USB_HostMsdGetDiskStatus(pdrv);
+            return stat;
+#endif
+#if defined(SD_DISK_ENABLE) && (SD_DISK_ENABLE == 1)
+        case SDDISK:
+            stat = sd_disk_status(pdrv);
+            return stat;
+#endif
 #if defined(MMC_DISK_ENABLE) && (MMC_DISK_ENABLE == 1)
         case MMCDISK:
             stat = mmc_disk_status(pdrv);
+            return stat;
+#endif
+#if defined(SDSPI_DISK_ENABLE) && (SDSPI_DISK_ENABLE == 1)
+        case SDSPIDISK:
+            stat = sdspi_disk_status(pdrv);
+            return stat;
+#endif
+#if defined(NAND_DISK_ENABLE) && (NAND_DISK_ENABLE == 1)
+        case NANDDISK:
+            stat = nand_disk_status(pdrv);
             return stat;
 #endif
         default:
@@ -57,9 +102,35 @@ DSTATUS disk_initialize (
     DSTATUS stat;
     switch (pdrv)
     {
+#if defined(RAM_DISK_ENABLE) && (RAM_DISK_ENABLE == 1)
+        case RAMDISK:
+            stat = ram_disk_initialize(pdrv);
+            return stat;
+#endif
+#if defined(USB_DISK_ENABLE) && (USB_DISK_ENABLE == 1)
+        case USBDISK:
+            stat = USB_HostMsdInitializeDisk(pdrv);
+            return stat;
+#endif
+#if defined(SD_DISK_ENABLE) && (SD_DISK_ENABLE == 1)
+        case SDDISK:
+            stat = sd_disk_initialize(pdrv);
+            return stat;
+#endif
 #if defined(MMC_DISK_ENABLE) && (MMC_DISK_ENABLE == 1)
         case MMCDISK:
             stat = mmc_disk_initialize(pdrv);
+            return stat;
+#endif
+#if defined(SDSPI_DISK_ENABLE) && (SDSPI_DISK_ENABLE == 1)
+        case SDSPIDISK:
+            stat = sdspi_disk_initialize(pdrv);
+            return stat;
+#endif
+
+#if defined(NAND_DISK_ENABLE) && (NAND_DISK_ENABLE == 1)
+        case NANDDISK:
+            stat = nand_disk_initialize(pdrv);
             return stat;
 #endif
         default:
@@ -84,9 +155,35 @@ DRESULT disk_read (
     DRESULT res;
     switch (pdrv)
     {
+#if defined(RAM_DISK_ENABLE) && (RAM_DISK_ENABLE == 1)
+        case RAMDISK:
+            res = ram_disk_read(pdrv, buff, sector, count);
+            return res;
+#endif
+#if defined(USB_DISK_ENABLE) && (USB_DISK_ENABLE == 1)
+        case USBDISK:
+            res = USB_HostMsdReadDisk(pdrv, buff, sector, count);
+            return res;
+#endif
+#if defined(SD_DISK_ENABLE) && (SD_DISK_ENABLE == 1)
+        case SDDISK:
+            res = sd_disk_read(pdrv, buff, sector, count);
+            return res;
+#endif
 #if defined(MMC_DISK_ENABLE) && (MMC_DISK_ENABLE == 1)
         case MMCDISK:
             res = mmc_disk_read(pdrv, buff, sector, count);
+            return res;
+#endif
+#if defined(SDSPI_DISK_ENABLE) && (SDSPI_DISK_ENABLE == 1)
+        case SDSPIDISK:
+            res = sdspi_disk_read(pdrv, buff, sector, count);
+            return res;
+#endif
+
+#if defined(NAND_DISK_ENABLE) && (NAND_DISK_ENABLE == 1)
+        case NANDDISK:
+            res = nand_disk_read(pdrv, buff, sector, count);
             return res;
 #endif
         default:
@@ -113,9 +210,35 @@ DRESULT disk_write (
     DRESULT res;
     switch (pdrv)
     {
+#if defined(RAM_DISK_ENABLE) && (RAM_DISK_ENABLE == 1)
+        case RAMDISK:
+            res = ram_disk_write(pdrv, buff, sector, count);
+            return res;
+#endif
+#if defined(USB_DISK_ENABLE) && (USB_DISK_ENABLE == 1)
+        case USBDISK:
+            res = USB_HostMsdWriteDisk(pdrv, buff, sector, count);
+            return res;
+#endif
+#if defined(SD_DISK_ENABLE) && (SD_DISK_ENABLE == 1)
+        case SDDISK:
+            res = sd_disk_write(pdrv, buff, sector, count);
+            return res;
+#endif
 #if defined(MMC_DISK_ENABLE) && (MMC_DISK_ENABLE == 1)
         case MMCDISK:
             res = mmc_disk_write(pdrv, buff, sector, count);
+            return res;
+#endif
+#if defined(SDSPI_DISK_ENABLE) && (SDSPI_DISK_ENABLE == 1)
+        case SDSPIDISK:
+            res = sdspi_disk_write(pdrv, buff, sector, count);
+            return res;
+#endif
+
+#if defined(NAND_DISK_ENABLE) && (NAND_DISK_ENABLE == 1)
+        case NANDDISK:
+            res = nand_disk_write(pdrv, buff, sector, count);
             return res;
 #endif
         default:
@@ -139,9 +262,35 @@ DRESULT disk_ioctl (
     DRESULT res;
     switch (pdrv)
     {
+#if defined(RAM_DISK_ENABLE) && (RAM_DISK_ENABLE == 1)
+        case RAMDISK:
+            res = ram_disk_ioctl(pdrv, cmd, buff);
+            return res;
+#endif
+#if defined(USB_DISK_ENABLE) && (USB_DISK_ENABLE == 1)
+        case USBDISK:
+            res = USB_HostMsdIoctlDisk(pdrv, cmd, buff);
+            return res;
+#endif
+#if defined(SD_DISK_ENABLE) && (SD_DISK_ENABLE == 1)
+        case SDDISK:
+            res = sd_disk_ioctl(pdrv, cmd, buff);
+            return res;
+#endif
 #if defined(MMC_DISK_ENABLE) && (MMC_DISK_ENABLE == 1)
         case MMCDISK:
             res = mmc_disk_ioctl(pdrv, cmd, buff);
+            return res;
+#endif
+#if defined(SDSPI_DISK_ENABLE) && (SDSPI_DISK_ENABLE == 1)
+        case SDSPIDISK:
+            res = sdspi_disk_ioctl(pdrv, cmd, buff);
+            return res;
+#endif
+
+#if defined(NAND_DISK_ENABLE) && (NAND_DISK_ENABLE == 1)
+        case NANDDISK:
+            res = nand_disk_ioctl(pdrv, cmd, buff);
             return res;
 #endif
         default:

@@ -87,7 +87,6 @@ int ff_mutex_create (	/* Returns 1:Function succeeded or 0:Could not create the 
 	T_CMTX cmtx = {TA_TPRI,1};
 
 	Mutex[vol] = acre_mtx(&cmtx);
-
 	return (int)(Mutex[vol] > 0);
 
 #elif OS_TYPE == 2	/* uC/OS-II */
@@ -157,16 +156,12 @@ int ff_mutex_take (	/* Returns 1:Succeeded or 0:Timeout */
 	return (int)(WaitForSingleObject(Mutex[vol], FF_FS_TIMEOUT) == WAIT_OBJECT_0);
 
 #elif OS_TYPE == 1	/* uITRON */
-	{
-		ER ercd = tloc_mtx(Mutex[vol], FF_FS_TIMEOUT);
-
-		return (int)(ercd == E_OK);
-	}
+	return (int)(tloc_mtx(Mutex[vol], FF_FS_TIMEOUT) == E_OK);
 
 #elif OS_TYPE == 2	/* uC/OS-II */
 	OS_ERR err;
 
-	OSMutexPend(Mutex[vol], FF_FS_TIMEOUT, &err));
+	OSMutexPend(Mutex[vol], FF_FS_TIMEOUT, &err);
 	return (int)(err == OS_NO_ERR);
 
 #elif OS_TYPE == 3	/* FreeRTOS */
