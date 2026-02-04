@@ -15,6 +15,7 @@
 #if (defined(SDK_COMPONENT_DEPENDENCY_FSL_COMMON) && (SDK_COMPONENT_DEPENDENCY_FSL_COMMON > 0U))
 #include "fsl_common.h"
 #else
+#include <stdint.h>
 #endif
 
 #include "fsl_os_abstraction_config.h"
@@ -125,7 +126,13 @@ typedef enum _osa_status
 #undef USE_RTOS
 #endif
 
-#if defined(FSL_OSA_UITRON)
+#if defined(SDK_OS_FREE_RTOS)
+#include "fsl_os_abstraction_free_rtos.h"
+#elif defined(FSL_RTOS_THREADX)
+#include "fsl_os_abstraction_threadx.h"
+#elif defined(__ZEPHYR__)
+#include "fsl_os_abstraction_zephyr.h"
+#elif defined(FSL_OSA_UITRON)
 #include "fsl_os_abstraction_uitron.h"
 #else
 #include "fsl_os_abstraction_bm.h"
@@ -133,7 +140,60 @@ typedef enum _osa_status
 
 extern const uint8_t gUseRtos_c;
 
-#if defined(FSL_OSA_UITRON)
+#if defined(SDK_OS_MQX)
+#define USE_RTOS (1)
+#elif defined(SDK_OS_FREE_RTOS)
+#define USE_RTOS (1)
+#if (defined(GENERIC_LIST_LIGHT) && (GENERIC_LIST_LIGHT > 0U))
+#if (defined(configSUPPORT_STATIC_ALLOCATION) && (configSUPPORT_STATIC_ALLOCATION > 0U)) && \
+    !((defined(configSUPPORT_DYNAMIC_ALLOCATION) && (configSUPPORT_DYNAMIC_ALLOCATION > 0U)))
+#define OSA_TASK_HANDLE_SIZE (150U)
+#else
+#define OSA_TASK_HANDLE_SIZE (12U)
+#endif
+#else
+#define OSA_TASK_HANDLE_SIZE (16U)
+#endif
+#if (defined(configSUPPORT_STATIC_ALLOCATION) && (configSUPPORT_STATIC_ALLOCATION > 0U)) && \
+    !((defined(configSUPPORT_DYNAMIC_ALLOCATION) && (configSUPPORT_DYNAMIC_ALLOCATION > 0U)))
+#define OSA_EVENT_HANDLE_SIZE (40U)
+#else
+#define OSA_EVENT_HANDLE_SIZE (8U)
+#endif
+#if (defined(configSUPPORT_STATIC_ALLOCATION) && (configSUPPORT_STATIC_ALLOCATION > 0U)) && \
+    !((defined(configSUPPORT_DYNAMIC_ALLOCATION) && (configSUPPORT_DYNAMIC_ALLOCATION > 0U)))
+#define OSA_SEM_HANDLE_SIZE (84U)
+#else
+#define OSA_SEM_HANDLE_SIZE (4U)
+#endif
+#if (defined(configSUPPORT_STATIC_ALLOCATION) && (configSUPPORT_STATIC_ALLOCATION > 0U)) && \
+    !((defined(configSUPPORT_DYNAMIC_ALLOCATION) && (configSUPPORT_DYNAMIC_ALLOCATION > 0U)))
+#define OSA_MUTEX_HANDLE_SIZE (84U)
+#else
+#define OSA_MUTEX_HANDLE_SIZE (4U)
+#endif
+#if (defined(configSUPPORT_STATIC_ALLOCATION) && (configSUPPORT_STATIC_ALLOCATION > 0U)) && \
+    !((defined(configSUPPORT_DYNAMIC_ALLOCATION) && (configSUPPORT_DYNAMIC_ALLOCATION > 0U)))
+#define OSA_MSGQ_HANDLE_SIZE (84U)
+#else
+#define OSA_MSGQ_HANDLE_SIZE (4U)
+#endif
+#define OSA_MSG_HANDLE_SIZE (0U)
+#if (defined(configSUPPORT_STATIC_ALLOCATION) && (configSUPPORT_STATIC_ALLOCATION > 0U)) && \
+    !((defined(configSUPPORT_DYNAMIC_ALLOCATION) && (configSUPPORT_DYNAMIC_ALLOCATION > 0U)))
+#define OSA_TIMER_HANDLE_SIZE (48U)
+#else
+#define OSA_TIMER_HANDLE_SIZE (4U)
+#endif
+#elif defined(SDK_OS_UCOSII)
+#define USE_RTOS (1)
+#elif defined(SDK_OS_UCOSIII)
+#define USE_RTOS (1)
+#elif defined(FSL_RTOS_THREADX)
+#define USE_RTOS (1)
+#elif defined(__ZEPHYR__)
+#define USE_RTOS (1)
+#elif defined(FSL_OSA_UITRON)
 #define USE_RTOS (1)
 #define OSA_TASK_HANDLE_SIZE  (4U)
 #define OSA_EVENT_HANDLE_SIZE (8U)
