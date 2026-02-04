@@ -13,14 +13,12 @@ OPT = -O0
 DBG_ON = yes
 
 # Directory definition
-#PRJTOP ?= $(shell pwd)
-
-###Omitting arguments###
+# Changed from CUI-dependent $(shell pwd)
 PRJTOP ?= $(CURDIR)
 SRCTOP = $(PRJTOP)/../../src
 DRVTOP = $(PRJTOP)/../../../../../../Driver/Standard
 KERTOP = $(PRJTOP)/../../../../../../Kernel/Standard
-
+# Additional directory paths
 ARCHTOP    = $(PRJTOP)/../../CMSIS/Core_AArch64
 NXPCOMPTOP = $(PRJTOP)/../../components
 NXPDRVTOP  = $(PRJTOP)/../../drivers
@@ -59,7 +57,7 @@ C_FILES		=	$(wildcard $(SRCTOP)/*.c) \
 				$(wildcard $(DRVTOP)/src/DDR_iMX_UART.c) \
 				$(wildcard $(DRVTOP)/src/GCC/DDR_AArch64_GICv3_sub.c) \
 				$(wildcard $(DRVTOP)/src/GCC/DDR_AArch64_GTIMER_sub.c)
-
+# Additional source files
 C_FILES		+= 	$(wildcard $(ARCHTOP)/CMSIS/Core_AArch64/Source/*.c) \
 				$(wildcard $(NXPCOMPTOP)/lists/*.c) \
 				$(wildcard $(NXPDRVTOP)/common/*.c) \
@@ -70,23 +68,8 @@ C_FILES		+= 	$(wildcard $(ARCHTOP)/CMSIS/Core_AArch64/Source/*.c) \
 				$(wildcard $(NXPMWTOP)/sdmmc/common/*.c) \
 				$(wildcard $(NXPMWTOP)/sdmmc/osa/*.c) \
 				$(wildcard $(NXPMWTOP)/sdmmc/mmc/*.c) 
-
-# OSA implementation switch: bm | uitron
-OSA_IMPL ?= uitron
-ifeq ($(OSA_IMPL),uitron)
 C_FILES		+=	$(NXPCOMPTOP)/osa/fsl_os_abstraction_uitron.c
-DEFINES     += -DFSL_OSA_UITRON -DOSA_USED
-else
-C_FILES		+=	$(NXPCOMPTOP)/osa/fsl_os_abstraction_bm.c
-endif
-
-# SDMMC host mode switch: blocking | non_blocking
-SDMMC_HOST_MODE ?= non_blocking
-ifeq ($(SDMMC_HOST_MODE),non_blocking)
 C_FILES		+=	$(NXPMWTOP)/sdmmc/host/usdhc/non_blocking/fsl_sdmmc_host.c
-else
-C_FILES		+=	$(NXPMWTOP)/sdmmc/host/usdhc/blocking/fsl_sdmmc_host.c
-endif
 
 # Object file components
 OBJS	:= $(ASM_FILES:.S=.o) $(C_FILES:.c=.o)
@@ -106,30 +89,32 @@ INCLUDES	= -I$(KERTOP)/inc
 INCLUDES	+= -I$(KERTOP)/inc/AArch64
 INCLUDES	+= -I$(DRVTOP)/inc
 INCLUDES	+= -I$(SRCTOP)
-
-INCLUDES     += -I$(ARCHTOP)/Include
-INCLUDES	 += -I$(NXPCOMPTOP)/lists
-INCLUDES	 += -I$(NXPCOMPTOP)/osa
-INCLUDES	 += -I$(NXPCOMPTOP)/osa/config
-INCLUDES     += -I$(NXPDRVTOP)/device 
-INCLUDES     += -I$(NXPDRVTOP)/common
-INCLUDES     += -I$(NXPDRVTOP)/usdhc
-INCLUDES     += -I$(NXPMWTOP)/fatfs/source
-INCLUDES     += -I$(NXPMWTOP)/fatfs/source/fsl_mmc_disk
-INCLUDES     += -I$(NXPMWTOP)/sdmmc/common
-INCLUDES     += -I$(NXPMWTOP)/sdmmc/host/usdhc
-INCLUDES     += -I$(NXPMWTOP)/sdmmc/osa
-INCLUDES     += -I$(NXPMWTOP)/sdmmc/mmc
+# Additional include paths
+INCLUDES	+= -I$(ARCHTOP)/Include
+INCLUDES	+= -I$(NXPCOMPTOP)/lists
+INCLUDES	+= -I$(NXPCOMPTOP)/osa
+INCLUDES	+= -I$(NXPCOMPTOP)/osa/config
+INCLUDES	+= -I$(NXPDRVTOP)/device 
+INCLUDES	+= -I$(NXPDRVTOP)/common
+INCLUDES	+= -I$(NXPDRVTOP)/usdhc
+INCLUDES	+= -I$(NXPMWTOP)/fatfs/source
+INCLUDES	+= -I$(NXPMWTOP)/fatfs/source/fsl_mmc_disk
+INCLUDES	+= -I$(NXPMWTOP)/sdmmc/common
+INCLUDES	+= -I$(NXPMWTOP)/sdmmc/host/usdhc
+INCLUDES	+= -I$(NXPMWTOP)/sdmmc/osa
+INCLUDES	+= -I$(NXPMWTOP)/sdmmc/mmc
 
 
 # Compiler macro definition
 define add_define
 DEFINES	+= -D$(1)$(if $(value $(1)),=$(value $(1)),)
 endef
+# Additional compiler macros
 DEFINES += -DCPU_MIMX8ML8DVNLZ_ca53
 DEFINES += -DMMC_ENABLED
 DEFINES += -D__STARTUP_INITIALIZE_NONCACHEDATA
 DEFINES += -D__DCACHE_PRESENT=1 -DFSL_FEATURE_HAS_L1CACHE=1
+DEFINES += -DFSL_OSA_UITRON -DOSA_USED
 
 # Compiler flags
 ASFLAGS			= -mcpu=${MCPU} -nostdinc -ffreestanding -Wa,--fatal-warnings \
@@ -143,16 +128,7 @@ CPPFLAGS		= $(CONFIG_FLAG) $(DEFINES) $(INCLUDES) -nostartfiles -L$(KERTOP) $(CF
 CPPFLAGS		+= -Wall -nostdlib
 
 # Compiler command related definition
-#CC			= $(CROSS_COMPILE)gcc
-#AS			= $(CROSS_COMPILE)gcc
-#LD			= $(CROSS_COMPILE)ld
-#NM			= $(CROSS_COMPILE)nm
-#OBJCOPY		= $(CROSS_COMPILE)objcopy
-#OBJDUMP		= $(CROSS_COMPILE)objdump
-#STRIP		= $(CROSS_COMPILE)strip
-#AR			= $(CROSS_COMPILE)ar
-
-###Omitting arguments###
+# CROSS_COMPILE should be defined for using GNU toolchain
 CC			= aarch64-none-elf-gcc
 AS			= aarch64-none-elf-gcc
 LD			= aarch64-none-elf-ld

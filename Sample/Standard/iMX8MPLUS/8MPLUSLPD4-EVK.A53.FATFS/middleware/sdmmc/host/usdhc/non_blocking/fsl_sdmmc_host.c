@@ -511,15 +511,9 @@ status_t SDMMCHOST_TransferFunction(sdmmchost_t *host, sdmmchost_transfer_t *con
     if (error == kStatus_Success)
     {
         /* wait command event */
-        while (true)
-        {
-            if (kStatus_Success == SDMMC_OSAEventWait(&(host->hostEvent), SDMMCHOST_TRANSFER_CMD_EVENT, 1000U, &event))
-            {
-                break;
-            }
-        }
-
-        if ((event & SDMMC_OSA_EVENT_TRANSFER_CMD_FAIL) != 0U)
+        if ((kStatus_Fail == SDMMC_OSAEventWait(&(host->hostEvent), SDMMCHOST_TRANSFER_CMD_EVENT,
+                                                SDMMCHOST_TRANSFER_COMPLETE_TIMEOUT, &event)) ||
+            ((event & SDMMC_OSA_EVENT_TRANSFER_CMD_FAIL) != 0U))
         {
             error = kStatus_Fail;
         }
@@ -529,15 +523,10 @@ status_t SDMMCHOST_TransferFunction(sdmmchost_t *host, sdmmchost_transfer_t *con
             {
                 if ((event & SDMMC_OSA_EVENT_TRANSFER_DATA_SUCCESS) == 0U)
                 {
-                    while (true)
-                    {
-                        if (kStatus_Success == SDMMC_OSAEventWait(&(host->hostEvent), SDMMCHOST_TRANSFER_DATA_EVENT,
-                                                                 1000U, &event))
-                        {
-                            break;
-                        }
-                    }
-                    if ((event & SDMMC_OSA_EVENT_TRANSFER_DATA_FAIL) != 0U)
+                    if (((event & SDMMC_OSA_EVENT_TRANSFER_DATA_FAIL) != 0U) ||
+                        (kStatus_Fail == SDMMC_OSAEventWait(&(host->hostEvent), SDMMCHOST_TRANSFER_DATA_EVENT,
+                                                            SDMMCHOST_TRANSFER_COMPLETE_TIMEOUT, &event) ||
+                         ((event & SDMMC_OSA_EVENT_TRANSFER_DATA_FAIL) != 0U)))
                     {
                         error = kStatus_Fail;
                     }
@@ -731,19 +720,7 @@ static void SDMMCHOST_ErrorRecovery(USDHC_Type *base)
 
 void SDMMCHOST_SetCardPower(sdmmchost_t *host, bool enable)
 {
-    USDHC_Type *base = host->hostController.base;
-
-    if (enable)
-    {
-        /* eMMC reset sequence for EVK: assert then deassert RESET_B */
-        USDHC_AssertHardwareReset(base, false);
-        SDMMC_OSADelay(1U);
-        USDHC_AssertHardwareReset(base, true);
-    }
-    else
-    {
-        USDHC_AssertHardwareReset(base, false);
-    }
+    /* host not support */
 }
 
 void SDMMCHOST_SetCardBusWidth(sdmmchost_t *host, uint32_t dataBusWidth)
@@ -837,10 +814,6 @@ status_t SDMMCHOST_Init(sdmmchost_t *host)
     /* Create handle for SDHC driver */
     usdhcCallback.TransferComplete = SDMMCHOST_TransferCompleteCallback;
     USDHC_TransferCreateHandle(usdhcHost->base, &host->handle, &usdhcCallback, host);
-
-    /* Enable interrupt status/signal for non-blocking transfers */
-    USDHC_EnableInterruptStatus(usdhcHost->base, kUSDHC_AllInterruptFlags);
-    USDHC_EnableInterruptSignal(usdhcHost->base, kUSDHC_AllInterruptFlags);
 
     /* Create transfer event. */
     if (kStatus_Success != SDMMC_OSAEventCreate(&(host->hostEvent)))
@@ -1013,6 +986,9 @@ static status_t SDMMC_CheckTuningResult(uint32_t *tuningWindow, uint32_t *validW
             {
                 tempValidWindowEnd = i - 1U;
 
+#if defined SDMMC_ENABLE_LOG_PRINT
+                SDMMC_LOG("valid tuning window start: %d, end: %d\r\n", tempValidWindowStart, tempValidWindowEnd);
+#endif
                 if (tempValidWindowLen > validWindowLenMax)
                 {
                     validWindowLenMax   = tempValidWindowLen;
@@ -1073,9 +1049,16 @@ static status_t SDMMCHOST_ExecuteManualTuning(sdmmchost_t *host,
         {
             USDHC_ClearInterruptStatusFlags(host->hostController.base, kUSDHC_TuningPassFlag);
             tuningWindow[tuningDelayCell / 32U] |= 1UL << (tuningDelayCell % 32U);
+
+#if defined SDMMC_ENABLE_LOG_PRINT
+            SDMMC_LOG("tuning pass point: %d\r\n", tuningDelayCell);
+#endif
         }
         else
         {
+#if defined SDMMC_ENABLE_LOG_PRINT
+            SDMMC_LOG("tuning fail point: %d\r\n", tuningDelayCell);
+#endif
 
         }
 

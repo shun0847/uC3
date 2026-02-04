@@ -6,10 +6,6 @@
  */
 
 #include "sdmmc_config.h"
-#include "imx8mplus_uC3.h"
-#include "kernel.h"
-#include "fsl_clock.h"
-#include "fsl_usdhc.h"
 
 /*******************************************************************************
  * Definitions

@@ -87,9 +87,6 @@ void UART_PRINTF(const char *fmt, ...)
     /* vsnprintf がバッファを超えた場合でも、バッファ内はNUL終端される */
     buf[sizeof(buf) - 1] = '\0';
 
-    /* ここに“挟みたい処理”を書く（例：ログタグ付与、改行統一、フィルタ等） */
-    // preprocess(buf);
-
     UINT txcnt;
 
     if (n >= (int)sizeof(buf)) {

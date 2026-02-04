@@ -527,4 +527,3 @@ void SDMMCHOST_ConvertDataToLittleEndian(sdmmchost_t *host, uint32_t *data, uint
 #endif
 /* @} */
 #endif /* _FSL_SDMMC_HOST_H */
-

@@ -53,6 +53,13 @@
                ((uint32_t)(buffer) & ((uint32_t)SDMMC_DATA_BUFFER_ALIGN_CACHE - 1U)))
 /*! @brief get maximum freq */
 #define FSL_SDMMC_CARD_MAX_BUS_FREQ(max, target) ((max) == 0U ? (target) : ((max) > (target) ? (target) : (max)))
+/*! @brief SD/MMC error log. */
+#if defined SDMMC_ENABLE_LOG_PRINT
+#include "fsl_debug_console.h"
+#define SDMMC_LOG(...) PRINTF(__VA_ARGS__)
+#else
+#define SDMMC_LOG(format, ...)
+#endif
 
 /*! @brief SD/MMC card API's running status.
  *  @anchor _sdmmc_status
