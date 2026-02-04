@@ -82,7 +82,7 @@ DRESULT mmc_disk_read(BYTE pdrv, BYTE* buff, LBA_t sector, UINT count)
     if ((sector + count) > UC3_PART_SECTORS) {
         return RES_PARERR;
     }
-    
+
     LBA_t phys = UC3_PART_START_LBA + sector;
 
     if (kStatus_Success != MMC_ReadBlocks(&g_mmc, buff, phys, count))
@@ -183,7 +183,7 @@ DSTATUS mmc_disk_initialize(BYTE pdrv)
         memset(&g_mmc, 0U, sizeof(g_mmc));
         return STA_NOINIT;
     }
-    
+
     isCardInitialized = true;
 
     return RES_OK;

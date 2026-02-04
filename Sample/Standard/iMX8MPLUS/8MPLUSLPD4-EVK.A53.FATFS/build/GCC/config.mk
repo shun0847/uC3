@@ -90,19 +90,19 @@ INCLUDES	+= -I$(KERTOP)/inc/AArch64
 INCLUDES	+= -I$(DRVTOP)/inc
 INCLUDES	+= -I$(SRCTOP)
 # Additional include paths
-INCLUDES     += -I$(ARCHTOP)/Include
-INCLUDES	 += -I$(NXPCOMPTOP)/lists
-INCLUDES	 += -I$(NXPCOMPTOP)/osa
-INCLUDES	 += -I$(NXPCOMPTOP)/osa/config
-INCLUDES     += -I$(NXPDRVTOP)/device 
-INCLUDES     += -I$(NXPDRVTOP)/common
-INCLUDES     += -I$(NXPDRVTOP)/usdhc
-INCLUDES     += -I$(NXPMWTOP)/fatfs/source
-INCLUDES     += -I$(NXPMWTOP)/fatfs/source/fsl_mmc_disk
-INCLUDES     += -I$(NXPMWTOP)/sdmmc/common
-INCLUDES     += -I$(NXPMWTOP)/sdmmc/host/usdhc
-INCLUDES     += -I$(NXPMWTOP)/sdmmc/osa
-INCLUDES     += -I$(NXPMWTOP)/sdmmc/mmc
+INCLUDES	+= -I$(ARCHTOP)/Include
+INCLUDES	+= -I$(NXPCOMPTOP)/lists
+INCLUDES	+= -I$(NXPCOMPTOP)/osa
+INCLUDES	+= -I$(NXPCOMPTOP)/osa/config
+INCLUDES	+= -I$(NXPDRVTOP)/device 
+INCLUDES	+= -I$(NXPDRVTOP)/common
+INCLUDES	+= -I$(NXPDRVTOP)/usdhc
+INCLUDES	+= -I$(NXPMWTOP)/fatfs/source
+INCLUDES	+= -I$(NXPMWTOP)/fatfs/source/fsl_mmc_disk
+INCLUDES	+= -I$(NXPMWTOP)/sdmmc/common
+INCLUDES	+= -I$(NXPMWTOP)/sdmmc/host/usdhc
+INCLUDES	+= -I$(NXPMWTOP)/sdmmc/osa
+INCLUDES	+= -I$(NXPMWTOP)/sdmmc/mmc
 
 
 # Compiler macro definition
