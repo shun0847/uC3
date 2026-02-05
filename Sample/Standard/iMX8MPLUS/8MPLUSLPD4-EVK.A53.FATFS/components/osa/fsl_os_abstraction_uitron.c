@@ -1,17 +1,59 @@
 /*! *********************************************************************************
  * Copyright (c) 2015, Freescale Semiconductor, Inc.
- * Copyright 2016-2025 NXP
+ * Copyright 2016-2017, 2019, 2025 NXP
  *
+ *
+ * This is the source file for the OS Abstraction layer for uitron.
  * SPDX-License-Identifier: BSD-3-Clause
  ********************************************************************************** */
 
+/*! *********************************************************************************
+*************************************************************************************
+* Include
+*************************************************************************************
+********************************************************************************** */
 #include "fsl_common.h"
 #include "fsl_os_abstraction.h"
 #include "fsl_os_abstraction_uitron.h"
-#include "kernel.h"
 #include <string.h>
-#include <stdlib.h>
 
+/*! *********************************************************************************
+*************************************************************************************
+* Private macros
+*************************************************************************************
+********************************************************************************** */
+
+/* Weak function. */
+#if defined(__GNUC__)
+#define __WEAK_FUNC __attribute__((weak))
+#elif defined(__ICCARM__)
+#define __WEAK_FUNC __weak
+#elif defined(__CC_ARM) || defined(__ARMCC_VERSION)
+#define __WEAK_FUNC __attribute__((weak))
+#endif
+
+#ifdef DEBUG_ASSERT
+#define OS_ASSERT(condition) \
+    if (!(condition))        \
+        while (1)            \
+            ;
+#else
+#define OS_ASSERT(condition) (void)(condition);
+#endif
+
+/*! @brief Converts milliseconds to ticks*/
+#define MSEC_TO_TICKS(msec) (((msec) * (uint32_t)(configTICK_RATE_HZ) + 999U) / 1000U)
+#define TICKS_TO_MSEC(tick) ((uint32_t)((uint64_t)(tick)*1000uL / (uint64_t)configTICK_RATE_HZ))
+
+#define OSA_MEM_MAGIC_NUMBER (12345U)
+#define OSA_MEM_SIZE_ALIGN(var, alignbytes) \
+    ((unsigned int)((var) + ((alignbytes)-1U)) & (unsigned int)(~(unsigned int)((alignbytes)-1U)))
+
+/************************************************************************************
+*************************************************************************************
+* Private type definitions
+*************************************************************************************
+************************************************************************************/
 typedef struct _osa_id_handle
 {
     ID id;
@@ -24,6 +66,23 @@ typedef struct _osa_event_handle
     uint8_t reserved[3];
 } osa_event_handle_struct_t;
 
+/*! *********************************************************************************
+*************************************************************************************
+* Public memory declarations
+*************************************************************************************
+********************************************************************************** */
+
+/*! *********************************************************************************
+*************************************************************************************
+* Private memory declarations
+*************************************************************************************
+********************************************************************************** */
+
+/*! *********************************************************************************
+*************************************************************************************
+* Private functions
+*************************************************************************************
+********************************************************************************** */
 static inline osa_id_handle_t *osa_id_handle(osa_semaphore_handle_t handle)
 {
     return (osa_id_handle_t *)handle;
@@ -34,6 +93,17 @@ static inline osa_event_handle_struct_t *osa_event_handle(osa_event_handle_t han
     return (osa_event_handle_struct_t *)handle;
 }
 
+/*! *********************************************************************************
+*************************************************************************************
+* Public functions
+*************************************************************************************
+********************************************************************************** */
+/*FUNCTION**********************************************************************
+ *
+ * Function Name : OSA_MemoryAllocate
+ * Description   : Reserves the requested amount of memory in bytes.
+ *
+ *END**************************************************************************/
 void *OSA_MemoryAllocate(uint32_t memLength)
 {
     void *p = malloc(memLength);
@@ -44,6 +114,12 @@ void *OSA_MemoryAllocate(uint32_t memLength)
     return p;
 }
 
+/*FUNCTION**********************************************************************
+ *
+ * Function Name : OSA_MemoryFree
+ * Description   : Frees the memory previously reserved.
+ *
+ *END**************************************************************************/
 void OSA_MemoryFree(void *p)
 {
     free(p);
