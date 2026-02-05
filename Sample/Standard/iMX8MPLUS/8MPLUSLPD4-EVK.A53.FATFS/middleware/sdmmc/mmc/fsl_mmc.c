@@ -499,8 +499,8 @@ static status_t MMC_Transfer(mmc_card_t *card, sdmmchost_transfer_t *content, ui
                 /* perform retuning */
                 if (MMC_ExecuteTuning(card) != kStatus_Success)
                 {
-                    SDMMC_LOG("\r\nError: retuning failed.");
                     error = kStatus_SDMMC_TuningFail;
+                    SDMMC_LOG("\r\nError: retuning failed.");
                     break;
                 }
                 else
@@ -583,6 +583,7 @@ status_t MMC_PollingCardStatusBusy(mmc_card_t *card, bool checkStatus, uint32_t 
                     if (0U != (status & (SDMMC_R1_ALL_ERROR_FLAG | SDMMC_MASK(kSDMMC_R1SwitchErrorFlag))))
                     {
                         SDMMC_LOG("\r\nError: CMD13 report switch error %x.", status);
+
                         error = kStatus_SDMMC_SwitchFailed;
                     }
                     else if ((0U != (status & SDMMC_MASK(kSDMMC_R1ReadyForDataFlag))) &&
@@ -615,6 +616,7 @@ status_t MMC_PollingCardStatusBusy(mmc_card_t *card, bool checkStatus, uint32_t 
             /* Delay 125us to throttle the polling rate */
             statusTimeoutUs -= SDMMC_OSADelayUs(125U);
         }
+
     } while (statusTimeoutUs != 0U);
 
     return error;
@@ -1719,12 +1721,7 @@ static status_t MMC_SelectBusTiming(mmc_card_t *card)
                 if (kStatus_Success !=
                     MMC_SwitchToHS200(card, FSL_SDMMC_CARD_MAX_BUS_FREQ(card->usrParam.maxFreq, MMC_CLOCK_HS200)))
                 {
-                    card->busTiming = kMMC_HighSpeedTiming;
-                    if (kStatus_Success != MMC_SwitchToHighSpeed(card))
-                    {
-                        return kStatus_SDMMC_SwitchBusTimingFailed;
-                    }
-                    break;
+                    return kStatus_SDMMC_SwitchBusTimingFailed;
                 }
                 break;
             }
@@ -1856,7 +1853,6 @@ static status_t MMC_CheckBlockRange(mmc_card_t *card, uint32_t startBlock, uint3
             error = kStatus_InvalidArgument;
             break;
     }
-
     /* Check if the block range accessed is within current partition's block boundary. */
     if ((error == kStatus_Success) && ((startBlock + blockCount) > partitionBlocks))
     {
@@ -2333,6 +2329,7 @@ status_t MMC_Init(mmc_card_t *card)
             error = kStatus_SDMMC_CardInitFailed;
         }
     }
+
     return error;
 }
 
