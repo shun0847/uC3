@@ -16,8 +16,9 @@
 #ifdef MMC_ENABLED
 #include "fsl_mmc.h"
 #endif
-
-//#include "clock_config.h"
+#ifdef SDIO_ENABLED
+#include "fsl_sdio.h"
+#endif
 #include "fsl_sdmmc_host.h"
 #include "fsl_sdmmc_common.h"
 
@@ -85,6 +86,16 @@ void BOARD_SD_Config(void *card, sd_cd_t cd, uint32_t hostIRQPriority, void *use
 #endif
 
 /*!
+ * @brief BOARD SDIO configurations.
+ * @param card card descriptor
+ * @param cd card detect callback
+ * @param cardInt card interrupt
+ */
+#ifdef SDIO_ENABLED
+void BOARD_SDIO_Config(void *card, sd_cd_t cd, uint32_t hostIRQPriority, sdio_int_t cardInt);
+#endif
+
+/*!
  * @brief BOARD MMC configurations.
  * @param card card descriptor
  * @param cd card detect callback
@@ -92,6 +103,7 @@ void BOARD_SD_Config(void *card, sd_cd_t cd, uint32_t hostIRQPriority, void *use
  */
 #ifdef MMC_ENABLED
 void BOARD_MMC_Config(void *card, uint32_t hostIRQPriority);
+
 #endif
 
 #if defined(__cplusplus)
