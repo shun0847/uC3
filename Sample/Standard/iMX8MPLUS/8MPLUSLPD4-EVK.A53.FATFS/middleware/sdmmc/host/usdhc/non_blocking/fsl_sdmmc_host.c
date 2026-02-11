@@ -505,7 +505,7 @@ status_t SDMMCHOST_TransferFunction(sdmmchost_t *host, sdmmchost_transfer_t *con
 #if defined SDMMCHOST_ENABLE_CACHE_LINE_ALIGN_TRANSFER && SDMMCHOST_ENABLE_CACHE_LINE_ALIGN_TRANSFER
     error = USDHC_TransferScatterGatherADMANonBlocking(host->hostController.base, &host->handle, &dmaConfig, &transfer);
 #else
-    error = USDHC_TransferNonBlocking(host->hostController.base, &host->handle, &dmaConfig, content);
+    error = USDHC_TransferNonBlocking(host->hostController.base, &host->handle, NULL, content);
 #endif
 
     if (error == kStatus_Success)
