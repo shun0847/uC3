@@ -489,7 +489,8 @@ static void cli_prompt_loop(void)
                 cli_redraw_line(prompt, line, idx);
                 continue;
             }
-            if (!isprint((unsigned char)c))
+            //if (!isprint((unsigned char)c))
+            if (((unsigned char)c < 0x20U) || ((unsigned char)c == 0x7FU)) 
             {
                 continue;
             }
