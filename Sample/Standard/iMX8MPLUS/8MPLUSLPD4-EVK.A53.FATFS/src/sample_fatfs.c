@@ -38,7 +38,6 @@ static void cli_redraw_line(const char *prompt, const char *buf, UINT len);
 static void selftest(void);
 static void mtx_test(void);
 static void mtx_test_task(VP_INT exinf);
-static void mmc_print_bus_status(void);
 /*******************************************************************************
  * Variables
  ******************************************************************************/
@@ -65,59 +64,13 @@ SDK_ALIGN(uint8_t g_bufferRead[BUFFER_SIZE], BOARD_SDMMC_DATA_BUFFER_ALIGN_SIZE)
 /*******************************************************************************
  * Code
  ******************************************************************************/
-static const char *mmc_bus_timing_name(uint32_t timing)
-{
-    switch (timing)
-    {
-        case kMMC_HighSpeedTimingNone:
-            return "Legacy";
-        case kMMC_HighSpeedTiming:
-            return "HighSpeed";
-        case kMMC_HighSpeed200Timing:
-            return "HS200";
-        case kMMC_HighSpeed400Timing:
-            return "HS400";
-        case kMMC_EnhanceHighSpeed400Timing:
-            return "HS400ES";
-        default:
-            return "Unknown";
-    }
-}
-
-static const char *mmc_bus_width_name(uint32_t width)
-{
-    switch (width)
-    {
-        case kMMC_DataBusWidth1bit:
-            return "1-bit";
-        case kMMC_DataBusWidth4bit:
-            return "4-bit";
-        case kMMC_DataBusWidth8bit:
-            return "8-bit";
-        case kMMC_DataBusWidth4bitDDR:
-            return "4-bit DDR";
-        case kMMC_DataBusWidth8bitDDR:
-            return "8-bit DDR";
-        default:
-            return "Unknown";
-    }
-}
-
-static void mmc_print_bus_status(void)
-{
-    PRINTF("MMC bus timing: %s\r\n", mmc_bus_timing_name(g_mmc.busTiming));
-    PRINTF("MMC bus width : %s\r\n", mmc_bus_width_name(g_mmc.busWidth));
-    PRINTF("MMC bus clock : %u Hz\r\n", (unsigned)g_mmc.busClock_Hz);
-    PRINTF("MMC VCCQ      : %u\r\n", (unsigned)g_mmc.hostVoltageWindowVCCQ);
-    PRINTF("MMC cardType  : 0x%02x\r\n", (unsigned)g_mmc.extendedCsd.cardType);
-}
 static void cli_print_help(void)
 {
     PRINTF("\r\nCommands:\r\n");
     PRINTF("  help                  - show this help\r\n");
     PRINTF("  ls [path]             - list directory (default .)\r\n");
     PRINTF("  cd [path]             - change directory\r\n");
-    PRINTF("  mkdir [path]           - create directory\r\n");
+    PRINTF("  mkdir [path]          - create directory\r\n");
     PRINTF("  touch [path]          - create empty file\r\n");
     PRINTF("  cat [path]            - print file contents\r\n");
     PRINTF("  echo \"text\" > [path]  - write text to file (overwrite)\r\n");
@@ -914,7 +867,6 @@ int fatfs_task(VP_INT exinf)
     else
     {
         PRINTF("Mount volume success.\r\n");
-        mmc_print_bus_status();
     } 
 
 #if (FF_FS_RPATH >= 2)
